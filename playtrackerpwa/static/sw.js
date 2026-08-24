@@ -5,7 +5,7 @@ const urlsToCache = [
     "/setup",
     "/category",
     "/static/style.css",
-    "/static/manifest.json"
+    "/static/manifest.json",
     "/static/storage.js"
 ];
 
