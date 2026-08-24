@@ -1,10 +1,10 @@
 from flask import Flask, render_template, request, send_from_directory
 
+app = Flask(__name__)
+
 @app.route("/sw.js")
 def service_worker():
     return send_from_directory("static", "sw.js")
-
-app = Flask(__name__)
 
 # -------------------------
 # PLAY DATA
