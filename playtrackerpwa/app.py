@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, send_from_directory
+from flask import Flask, render_template, request, send_from_directory, jsonify
 
 app = Flask(__name__)
 
@@ -19,7 +19,7 @@ plays_by_category = {
         "14","32","5 out","Hi Low","Michigan","NY","Sparkle"
     ],
     "Blob": [
-        "Box","Strong","L","Weak","O","X","K"
+        "Box","Strong","L","Weak","Weak Rev", "O","X","K"
     ],
     "Slob": [
         "Irish","Atlanta"
@@ -30,6 +30,15 @@ plays_by_category = {
         "Twilight","Marquette","Transition"
     ]
 }
+@app.route("/offline-urls")
+def offline_urls():
+    urls = []
+
+    for category, plays in plays_by_category.items():
+        for play in plays:
+            urls.append(f"/stat/{category}/{play}")
+
+    return jsonify(urls)
 
 # -------------------------
 # STAT ENTRY PAGE
