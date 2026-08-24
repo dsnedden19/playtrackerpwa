@@ -6,6 +6,7 @@ const urlsToCache = [
     "/category",
     "/static/style.css",
     "/static/manifest.json"
+    "/static/storage.js"
 ];
 
 self.addEventListener("install", event => {
