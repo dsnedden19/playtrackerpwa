@@ -4,6 +4,12 @@ const urlsToCache = [
     "/",
     "/setup",
     "/category",
+    "/summary",
+    "/plays/Man%20Offense",
+    "/plays/Zone%20Offense",
+    "/plays/Blob",
+    "/plays/Slob",
+    "/plays/Defense",
     "/static/style.css",
     "/static/manifest.json",
     "/static/storage.js"
