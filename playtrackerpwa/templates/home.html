@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="manifest" href="/static/manifest.json">
+    <title>Basketball Play Tracker</title>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Basketball Play Tracker</h1>
+
+        <p>Welcome to your app.</p>
+
+        <div class="button-grid">
+            <a href="/setup" class="button" style="background-color: #0074D9;">
+                Start New Game
+            </a>
+
+            <a href="/summary" class="button" style="background-color: #111111;">
+                View Summary
+            </a>
+        </div>
+    </div>
+<script>
+if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("/static/sw.js")
+        .then(() => console.log("Service Worker Registered"))
+        .catch(err => console.error("Service Worker Error:", err));
+}
+</script>
+</body>
+</html>
