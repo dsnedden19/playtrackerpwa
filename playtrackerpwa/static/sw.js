@@ -1,4 +1,4 @@
-const CACHE_NAME = "playtracker-v4";
+const CACHE_NAME = "playtracker-v5";
 
 const urlsToCache = [
     "/",
@@ -19,8 +19,14 @@ self.addEventListener("install", event => {
     self.skipWaiting();
 
     event.waitUntil(
-        caches.open(CACHE_NAME)
-            .then(cache => cache.addAll(urlsToCache))
+        caches.open(CACHE_NAME).then(async cache => {
+            await cache.addAll(urlsToCache);
+
+            const response = await fetch("/offline-urls");
+            const statUrls = await response.json();
+
+            await cache.addAll(statUrls);
+        })
     );
 });
 
