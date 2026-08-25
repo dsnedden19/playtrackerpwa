@@ -1,4 +1,4 @@
-const CACHE_NAME = "playtracker-v5";
+const CACHE_NAME = "playtracker-v6";
 
 const urlsToCache = [
     "/",
