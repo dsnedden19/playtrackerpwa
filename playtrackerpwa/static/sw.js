@@ -1,4 +1,4 @@
-const CACHE_NAME = "playtracker-v13";
+const CACHE_NAME = "playtracker-v14";
 
 const urlsToCache = [
     "/",
@@ -11,7 +11,7 @@ const urlsToCache = [
     "/static/style.css",
     "/static/manifest.json",
     "/static/storage.js",
-    "/sw,js"
+    "/sw.js"
 ];
 
 self.addEventListener("install", event => {
