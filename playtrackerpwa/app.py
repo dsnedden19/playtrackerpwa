@@ -40,15 +40,8 @@ plays_by_category = {
 # -------------------------
 # STAT ENTRY PAGE
 # -------------------------
-@app.route("/stat")
-def stat_shell():
-    return render_template(
-        "stat.html",
-        category="",
-        play="",
-        counters=[],
-        values={}
-    )
+@app.route("/stat/<cat>/<play>")
+def stat(cat, play):
     # Choose counters based on category
     offense_counters = [
         "LUM","LUA","UnCon LUM","UnCon LUA",
@@ -126,9 +119,8 @@ def category():
 # -------------------------
 # PLAYS PAGE
 # -------------------------
-@app.route("/plays")
-def plays_shell():
-    return render_template("plays.html", category="", plays=[])
+@app.route("/plays/<cat>")
+def plays(cat):
 
 
 # -------------------------
