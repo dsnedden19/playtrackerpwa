@@ -1,4 +1,4 @@
-const CACHE_NAME = "playtracker-v18";
+const CACHE_NAME = "playtracker-v19";
 
 const urlsToCache = [
     "/",
@@ -32,6 +32,14 @@ self.addEventListener("install", event => {
 self.addEventListener("fetch", event => {
     event.respondWith(
         caches.match(event.request)
-            .then(response => response || fetch(event.request))
+            .then(response => {
+                if (response) {
+                    return response;
+                }
+
+                return fetch(event.request).catch(() => {
+                    return caches.match("/");
+                });
+            })
     );
 });
