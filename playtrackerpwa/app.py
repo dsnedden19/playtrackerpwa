@@ -1,10 +1,16 @@
-from flask import Flask, render_template, request, send_from_directory, jsonify
+from flask import Flask, render_template, request, send_from_directory
 
 app = Flask(__name__)
 
 @app.route("/sw.js")
 def service_worker():
     return send_from_directory("static", "sw.js")
+
+@app.route("/saved_games")
+def saved_games():
+    return render_template("saved_games.html")
+
+
 
 # -------------------------
 # PLAY DATA
@@ -19,7 +25,7 @@ plays_by_category = {
         "14","32","5 out","Hi Low","Michigan","NY","Sparkle"
     ],
     "Blob": [
-        "Box","Strong","L","Weak","Weak Rev", "O","X","K"
+        "Box","Strong","L","Weak","O","X","K"
     ],
     "Slob": [
         "Irish","Atlanta"
@@ -30,15 +36,6 @@ plays_by_category = {
         "Twilight","Marquette","Transition"
     ]
 }
-@app.route("/offline-urls")
-def offline_urls():
-    urls = []
-
-    for category, plays in plays_by_category.items():
-        for play in plays:
-            urls.append(f"/stat/{category}/{play}")
-
-    return jsonify(urls)
 
 # -------------------------
 # STAT ENTRY PAGE
@@ -135,11 +132,52 @@ def plays(cat):
 def summary():
     return render_template("summary.html", game=None, stats={})
 
+#-------------------------
+# Upload
+#------------------------
+@app.route("/api/upload-game", methods=["POST"])
+def upload_game():
+    payload = request.get_json(silent=True)
+
+    if not payload:
+        return {
+            "success": False,
+            "message": "No JSON payload received."
+        }, 400
+
+    game = payload.get("game")
+    play_stats = payload.get("playStats")
+
+    if not game:
+        return {
+            "success": False,
+            "message": "Game data is missing."
+        }, 400
+
+    if play_stats is None:
+        return {
+            "success": False,
+            "message": "Play-stat data is missing."
+        }, 400
+
+    print("Upload received:")
+    print("Game ID:", game.get("id"))
+    print("Opponent:", game.get("opponent"))
+    print("Play-stat records:", len(play_stats))
+
+    return {
+        "success": True,
+        "message": "Upload received by Flask.",
+        "gameId": game.get("id"),
+        "playStatCount": len(play_stats)
+    }, 200
 
 # -------------------------
 # RUN APP
 # -------------------------
 if __name__ == "__main__":
     app.run(debug=True)
+
+
 
 
