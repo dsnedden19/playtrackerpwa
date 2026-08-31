@@ -1,0 +1,55 @@
+<link rel="stylesheet" href="/static/style.css">
+
+<div class="container">
+    <h2>Game Setup</h2>
+
+    <form id="setup-form" method="POST">
+
+        <label>Opponent:</label><br>
+        <input type="text" name="opponent"
+               style="width: 80%; max-width: 400px; padding: 12px; font-size: 20px; margin: 10px 0;"><br><br>
+
+        <label>Date:</label><br>
+        <input type="date" name="date"
+               style="width: 80%; max-width: 400px; padding: 12px; font-size: 20px; margin: 10px 0;"><br><br>
+
+        <label>Home or Away:</label><br>
+        <select name="homeaway"
+                style="width: 80%; max-width: 400px; padding: 12px; font-size: 20px; margin: 10px 0;">
+            <option value="Home">Home</option>
+            <option value="Away">Away</option>
+        </select><br><br>
+
+        <div class="button-grid">
+            <button type="submit" class="button" style="background-color: #0074D9;">
+                Start Game
+            </button>
+
+            <a href="/" class="button" style="background-color: gray;">
+                Back to Home
+            </a>
+        </div>
+
+    </form>
+
+<script src="/static/storage.js"></script>
+<script>
+    document.getElementById("setup-form").addEventListener("submit", async function (event) {
+        event.preventDefault();
+
+        const form = event.target;
+
+        const game = await saveGame({
+            opponent: form.opponent.value,
+            date: form.date.value,
+            homeaway: form.homeaway.value,
+            stats: {}
+        });
+
+        localStorage.setItem("activeGameId", game.id);
+
+        window.location.href = "/category";
+    });
+</script>
+
+</div>
