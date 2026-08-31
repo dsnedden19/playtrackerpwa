@@ -37,9 +37,24 @@ self.addEventListener("fetch", event => {
                     return response;
                 }
 
-                return fetch(event.request).catch(() => {
-                    return caches.match("/");
-                });
+                return fetch(event.request)
+                    .then(networkResponse => {
+                        return networkResponse;
+                    })
+                    .catch(() => {
+
+                        const url = new URL(event.request.url);
+
+                        if (url.pathname.startsWith("/plays/")) {
+                            return caches.match("/category");
+                        }
+
+                        if (url.pathname.startsWith("/stat/")) {
+                            return caches.match("/category");
+                        }
+
+                        return caches.match("/");
+                    });
             })
     );
 });
