@@ -191,3 +191,18 @@ async function loadGamePlayStats(gameId) {
         request.onerror = event => reject(event.target.error);
     });
 }
+async function buildGameUploadPayload(gameId) {
+    const game = await loadGame(gameId);
+
+    if (!game) {
+        throw new Error("Game not found: " + gameId);
+    }
+
+    const playStats = await loadGamePlayStats(gameId);
+
+    return {
+        game: game,
+        playStats: playStats,
+        uploadedAt: new Date().toISOString()
+    };
+}
