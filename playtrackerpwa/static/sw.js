@@ -5,6 +5,9 @@ const urlsToCache = [
     "/setup",
     "/category",
     "/saved_games",
+    "/stat",
+    "/plays",
+    "/summary",
     "/static/style.css",
     "/static/manifest.json",
     "/static/storage.js"
