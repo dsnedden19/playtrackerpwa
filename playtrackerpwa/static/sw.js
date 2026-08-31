@@ -4,8 +4,10 @@ const urlsToCache = [
     "/",
     "/setup",
     "/category",
+    "/saved_games",
     "/static/style.css",
-    "/static/manifest.json"
+    "/static/manifest.json",
+    "/static/storage.js"
 ];
 
 self.addEventListener("install", event => {
