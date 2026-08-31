@@ -1,4 +1,4 @@
-const CACHE_NAME = "playtracker-v15";
+const CACHE_NAME = "playtracker-v16";
 
 const urlsToCache = [
     "/",
@@ -21,9 +21,17 @@ self.addEventListener("install", event => {
     );
 });
 
-self.addEventListener("fetch", event => {
-    event.respondWith(
-        caches.match(event.request)
-            .then(response => response || fetch(event.request))
+self.addEventListener("install", event => {
+    event.waitUntil(
+        caches.open(CACHE_NAME).then(async cache => {
+            for (const url of urlsToCache) {
+                try {
+                    await cache.add(url);
+                    console.log("Cached:", url);
+                } catch (err) {
+                    console.error("FAILED:", url, err);
+                }
+            }
+        })
     );
 });
