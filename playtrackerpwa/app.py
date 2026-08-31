@@ -40,7 +40,7 @@ plays_by_category = {
 # -------------------------
 # STAT ENTRY PAGE
 # -------------------------
-@app.route("/stat/<cat>/<play>")
+@app.route("/stat/<cat>/<play>", methods=["GET", "POST"])
 def stat(cat, play):
     # Choose counters based on category
     offense_counters = [
@@ -121,7 +121,12 @@ def category():
 # -------------------------
 @app.route("/plays/<cat>")
 def plays(cat):
-
+    play_list = plays_by_category.get(cat, [])
+    return render_template(
+        "plays.html",
+        category=cat,
+        plays=play_list
+    )
 
 # -------------------------
 # SUMMARY PAGE
