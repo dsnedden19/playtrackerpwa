@@ -43,6 +43,7 @@ plays_by_category = {
 @app.route("/plays")
 def plays_page():
     return render_template("plays.html", category="", plays=[])
+    
 @app.route("/plays/<cat>")
 def plays(cat):
     play_list = plays_by_category.get(cat, [])
