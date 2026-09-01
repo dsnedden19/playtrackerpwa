@@ -1,3 +1,5 @@
+from urllib.parse import quote
+
 from flask import Flask, render_template, request, send_from_directory
 
 app = Flask(__name__)
@@ -80,6 +82,19 @@ def stat(cat, play):
     counters=counters,
     values=stats[cat][play]
 )
+# -------------------------
+# OFFLINE URL LIST (for the service worker to precache)
+# -------------------------
+@app.route("/api/offline-urls")
+def offline_urls():
+    urls = []
+    for cat, plays in plays_by_category.items():
+        urls.append(f"/plays/{quote(cat)}")
+        for play in plays:
+            urls.append(f"/stat/{quote(cat)}/{quote(play)}")
+    return {"urls": urls}
+
+
 # -------------------------
 # HOME PAGE
 # -------------------------
