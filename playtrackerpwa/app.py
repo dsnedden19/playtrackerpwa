@@ -74,12 +74,12 @@ def stat(cat, play):
         stats[cat][play][counter_clicked] += 1
 
     return render_template(
-        "stat.html",
-        category=cat,
-        play=play,
-        rs,
-        values=stats[cat][play]
-    )
+    "stat.html",
+    category=cat,
+    play=play,
+    counters=counters,
+    values=stats[cat][play]
+)
 # -------------------------
 # HOME PAGE
 # -------------------------
