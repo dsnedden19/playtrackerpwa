@@ -45,16 +45,16 @@ plays_by_category = {
 def stat(cat, play):
 
     offense_counters = [
-        "LUM", "LUA", "UnCon LUM", "UnCon LUA",
-        "MidM", "MidA", "3ptM", "3ptA", "FTM", "FTA",
-        "O Reb", "2nd Chance",
-        "D Foul", "O Foul", "Turnover", "Ran"
+        "LUM","LUA","UnCon LUM","UnCon LUA",
+        "MidM","MidA","3ptM","3ptA","FTM","FTA",
+        "O Reb","2nd Chance",
+        "D Foul","O Foul","Turnover","Ran"
     ]
 
     defense_counters = [
-        "Off Reb", "2nd Chance", "D Reb", "D Foul",
-        "FTM", "FTA", "O Foul", "Tip",
-        "Turnover", "Clost Out", "Ran"
+        "Off Reb","2nd Chance","D Reb","D Foul",
+        "FTM","FTA","O Foul","Tip",
+        "Turnover","Clost Out","Ran"
     ]
 
     counters = defense_counters if cat == "Defense" else offense_counters
@@ -74,12 +74,11 @@ def stat(cat, play):
         stats[cat][play][counter_clicked] += 1
 
     return render_template(
-        "stat.html",
-        category=cat,
-        playcounters=counters,
+        "stat.htmlgory=cat,
+        play=play,
+        counters=counters,
         values=stats[cat][play]
     )
-
 
 # -------------------------
 # HOME PAGE
