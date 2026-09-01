@@ -73,12 +73,13 @@ def stat(cat, play):
         counter_clicked = request.form["counter"]
         stats[cat][play][counter_clicked] += 1
 
-    return render_template(
-        "stat.htmlgory=cat,
-        play=play,
-        counters=counters,
-        values=stats[cat][play]
-    )
+  return render_template(
+    "stat.html",
+    category=cat,
+    play=play,
+    counters=counters,
+    values=stats[cat][play]
+)
 
 # -------------------------
 # HOME PAGE
