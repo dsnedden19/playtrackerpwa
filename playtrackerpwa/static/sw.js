@@ -1,4 +1,4 @@
-const CACHE_NAME = "playtracker-v22";
+const CACHE_NAME = "playtracker-v23";
 
 // Only routes that exist with no URL params. Dynamic pages
 // (/stat/<cat>/<play>, /plays/<cat>) get cached on first visit instead —
@@ -20,15 +20,31 @@ const urlsToCache = [
 self.addEventListener("install", event => {
     self.skipWaiting();
     event.waitUntil(
-        caches.open(CACHE_NAME).then(async cache => {
-            for (const url of urlsToCache) {
+        (async () => {
+            const cache = await caches.open(CACHE_NAME);
+
+            // Every /stat/<cat>/<play> and /plays/<cat> page, generated
+            // server-side from plays_by_category, so nothing depends on
+            // having visited a play manually while online first.
+            let dynamicUrls = [];
+            try {
+                const res = await fetch("/api/offline-urls");
+                const data = await res.json();
+                dynamicUrls = data.urls || [];
+            } catch (err) {
+                console.error("Could not fetch offline URL list — dynamic pages will only cache as they're visited:", err);
+            }
+
+            const allUrls = [...urlsToCache, ...dynamicUrls];
+
+            for (const url of allUrls) {
                 try {
                     await cache.add(url);
                 } catch (err) {
                     console.error("FAILED to precache:", url, err);
                 }
             }
-        })
+        })()
     );
 });
 
