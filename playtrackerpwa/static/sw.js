@@ -1,4 +1,4 @@
-const CACHE_NAME = "playtracker-v20";
+const CACHE_NAME = "playtracker-v21";
 
 const urlsToCache = [
     "/",
@@ -30,31 +30,23 @@ self.addEventListener("install", event => {
 });
 
 self.addEventListener("fetch", event => {
+    console.log("FETCH:", event.request.url);
+
     event.respondWith(
         caches.match(event.request)
             .then(response => {
                 if (response) {
+                    console.log("CACHE HIT:", event.request.url);
                     return response;
                 }
 
-                return fetch(event.request)
-                    .then(networkResponse => {
-                        return networkResponse;
-                    })
-                    .catch(() => {
+                console.log("NETWORK:", event.request.url);
 
-                        const url = new URL(event.request.url);
+                return fetch(event.request).catch(err => {
+                    console.log("FAILED:", event.request.url, err);
 
-                        if (url.pathname.startsWith("/plays/")) {
-                            return caches.match("/category");
-                        }
-
-                        if (url.pathname.startsWith("/stat/")) {
-                            return caches.match("/category");
-                        }
-
-                        return caches.match("/");
-                    });
+                    return caches.match("/");
+                });
             })
     );
 });
