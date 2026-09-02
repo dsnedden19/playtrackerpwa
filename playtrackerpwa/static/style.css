@@ -1,46 +1,141 @@
+/* ===== PLAYTRACKER DARK SPORTS THEME ===== */
+
 /* GLOBAL LAYOUT */
 body {
-    font-family: Arial, sans-serif;
+    font-family: "Segoe UI", Arial, sans-serif;
     text-align: center;
     margin: 0;
     padding: 10px;
-    background-color: #f4f4f4;
+    background: #121212;
+    color: #f5f5f5;
 }
 
 /* RESPONSIVE CONTAINER */
 .container {
-    max-width: 700px;   /* smaller width = no scrolling */
+    max-width: 700px;
     margin: auto;
+    padding: 15px;
+}
+
+/* HEADERS */
+h1, h2, h3 {
+    color: #ff7a00;
+    font-weight: 700;
+    margin-bottom: 20px;
 }
 
 /* UNIVERSAL BUTTON STYLE */
 .button {
     display: block;
-    padding: 14px 18px;        /* smaller padding */
-    margin: 8px auto;          /* tighter spacing */
-    font-size: 20px;           /* slightly smaller text */
+    padding: 14px 18px;
+    margin: 8px auto;
+    font-size: 20px;
     font-weight: bold;
     text-align: center;
-    border-radius: 10px;
+    border-radius: 14px;
     color: white;
-    width: 85%;                /* narrower buttons */
-    max-width: 320px;          /* fits iPad landscape */
+    width: 85%;
+    max-width: 320px;
     box-sizing: border-box;
+    border: none;
+    text-decoration: none;
+    box-shadow: 0 4px 10px rgba(0,0,0,.4);
+    transition: all .2s ease;
+}
+
+.button:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.1);
 }
 
 /* CATEGORY COLORS */
-.cat-man { background-color: #0074D9; }
-.cat-zone { background-color: #2ECC40; }
-.cat-blob { background-color: #FF4136; }
-.cat-slob { background-color: #FF851B; }
-.cat-defense { background-color: #B10DC9; }
+.cat-man {
+    background: linear-gradient(135deg, #0066ff, #009dff);
+}
+
+.cat-zone {
+    background: linear-gradient(135deg, #1cbf5b, #39e67a);
+}
+
+.cat-blob {
+    background: linear-gradient(135deg, #e53935, #ff5c5c);
+}
+
+.cat-slob {
+    background: linear-gradient(135deg, #ff7a00, #ffae42);
+}
+
+.cat-defense {
+    background: linear-gradient(135deg, #8e24aa, #c158dc);
+}
 
 /* PLAY & STAT ROTATION COLORS */
-.play-1, .stat-1 { background-color: #0074D9; }
-.play-2, .stat-2 { background-color: #2ECC40; }
-.play-3, .stat-3 { background-color: #FF4136; }
-.play-4, .stat-4 { background-color: #FF851B; color: black; }
-.play-5, .stat-5 { background-color: #B10DC9; }
+.play-1, .stat-1 {
+    background: linear-gradient(135deg, #0066ff, #009dff);
+}
+
+.play-2, .stat-2 {
+    background: linear-gradient(135deg, #1cbf5b, #39e67a);
+}
+
+.play-3, .stat-3 {
+    background: linear-gradient(135deg, #e53935, #ff5c5c);
+}
+
+.play-4, .stat-4 {
+    background: linear-gradient(135deg, #ff7a00, #ffae42);
+    color: black;
+}
+
+.play-5, .stat-5 {
+    background: linear-gradient(135deg, #8e24aa, #c158dc);
+}
+
+/* BUTTON GRID */
+.button-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-top: 30px;
+}
+
+/* FORM ELEMENTS */
+input,
+select,
+textarea {
+    background: #1e1e1e;
+    color: white;
+    border: 1px solid #444;
+    border-radius: 10px;
+    padding: 12px;
+    width: 90%;
+    max-width: 400px;
+    margin: 8px auto;
+    display: block;
+}
+
+/* TABLES */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #1e1e1e;
+    color: white;
+}
+
+th {
+    background: #ff7a00;
+}
+
+th,
+td {
+    border: 1px solid #333;
+    padding: 10px;
+}
+
+/* LINKS */
+a {
+    color: #4db8ff;
+}
 
 /* iPad PORTRAIT */
 @media (max-width: 1024px) {
@@ -61,12 +156,3 @@ body {
         max-width: 280px;
     }
 }
-
-.button-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-    margin-top: 30px;
-}
-
-
