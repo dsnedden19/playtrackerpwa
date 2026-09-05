@@ -1,6 +1,9 @@
 from urllib.parse import quote
 
 from flask import Flask, render_template, request, send_from_directory
+from psycopg import Error as PsycopgError
+
+from database import save_game_upload
 
 app = Flask(__name__)
 
@@ -173,7 +176,7 @@ def upload_game():
     game = payload.get("game")
     play_stats = payload.get("playStats")
 
-    if not game:
+    if not isinstance(game, dict):
         return {
             "success": False,
             "message": "Game data is missing."
@@ -185,16 +188,33 @@ def upload_game():
             "message": "Play-stat data is missing."
         }, 400
 
-    print("Upload received:")
-    print("Game ID:", game.get("id"))
-    print("Opponent:", game.get("opponent"))
-    print("Play-stat records:", len(play_stats))
+    if not isinstance(play_stats, list) or not all(
+        isinstance(record, dict) for record in play_stats
+    ):
+        return {
+            "success": False,
+            "message": "Play-stat data must be a list of objects."
+        }, 400
+
+    try:
+        play_stat_count = save_game_upload(game, play_stats)
+    except (RuntimeError, ValueError) as error:
+        return {
+            "success": False,
+            "message": str(error)
+        }, 503 if isinstance(error, RuntimeError) else 400
+    except PsycopgError:
+        app.logger.exception("Could not save game upload to PostgreSQL.")
+        return {
+            "success": False,
+            "message": "Could not save game to PostgreSQL."
+        }, 503
 
     return {
         "success": True,
-        "message": "Upload received by Flask.",
+        "message": "Game saved to PostgreSQL.",
         "gameId": game.get("id"),
-        "playStatCount": len(play_stats)
+        "playStatCount": play_stat_count
     }, 200
 
 
@@ -203,5 +223,3 @@ def upload_game():
 # -------------------------
 if __name__ == "__main__":
     app.run(debug=True)
-
-
