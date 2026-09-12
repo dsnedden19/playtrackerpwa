@@ -22,6 +22,19 @@ def save_game_upload(game, events):
         with connection.cursor() as cursor:
             cursor.execute(
                 """
+                SELECT 1
+                FROM information_schema.columns
+                WHERE table_schema = 'public'
+                  AND table_name = 'games'
+                  AND column_name = 'id'
+                """
+            )
+            if cursor.fetchone() is None:
+                cursor.execute(
+                    "ALTER TABLE IF EXISTS games RENAME TO games_legacy"
+                )
+            cursor.execute(
+                """
                 CREATE TABLE IF NOT EXISTS games (
                     id TEXT PRIMARY KEY,
                     opponent TEXT,
