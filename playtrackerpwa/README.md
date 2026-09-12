@@ -1,6 +1,6 @@
 # Play Tracker
 
-The app stores games and play statistics in the browser while it is offline. Use
+The app stores games and individual play events in the browser while it is offline. Use
 the **Upload Game** action on the Saved Games page to push a game to a local
 PostgreSQL server.
 
@@ -26,6 +26,7 @@ PostgreSQL server.
    flask --app app run
    ```
 
-The `games` and `play_stats` tables are created automatically on the first
-upload. Re-uploading a game updates the game and replaces its play-stat rows,
-so the PostgreSQL copy matches the browser payload.
+The `games` and `game_events` tables are created automatically on the first
+upload. Each recorded action is stored as one ordered event row with a unique
+`event_number` within its game. Re-uploading a game replaces its event rows so
+the PostgreSQL copy matches the browser payload.

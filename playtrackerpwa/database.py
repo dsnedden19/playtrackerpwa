@@ -13,7 +13,7 @@ def _database_url():
     return database_url
 
 
-def save_game_upload(game, play_stats):
+def save_game_upload(game, events):
     game_id = game.get("id")
     if not game_id:
         raise ValueError("Game data must include an id.")
@@ -34,14 +34,18 @@ def save_game_upload(game, play_stats):
             )
             cursor.execute(
                 """
-                CREATE TABLE IF NOT EXISTS play_stats (
+                CREATE TABLE IF NOT EXISTS game_events (
                     id TEXT PRIMARY KEY,
                     game_id TEXT NOT NULL REFERENCES games(id) ON DELETE CASCADE,
+                    event_number INTEGER NOT NULL,
+                    event_type TEXT NOT NULL,
                     category TEXT NOT NULL,
                     play TEXT NOT NULL,
-                    counters JSONB NOT NULL,
+                    stat TEXT NOT NULL,
+                    shot_location JSONB,
                     data JSONB NOT NULL,
-                    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+                    recorded_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                    UNIQUE (game_id, event_number)
                 )
                 """
             )
@@ -64,27 +68,32 @@ def save_game_upload(game, play_stats):
                     Jsonb(game),
                 ),
             )
-            cursor.execute("DELETE FROM play_stats WHERE game_id = %s", (str(game_id),))
+            cursor.execute("DELETE FROM game_events WHERE game_id = %s", (str(game_id),))
 
-            for record in play_stats:
+            for record in events:
                 record_id = record.get("id")
                 if not record_id:
-                    raise ValueError("Every play-stat record must include an id.")
+                    raise ValueError("Every event must include an id.")
                 cursor.execute(
                     """
-                    INSERT INTO play_stats (
-                        id, game_id, category, play, counters, data
+                    INSERT INTO game_events (
+                        id, game_id, event_number, event_type, category, play,
+                        stat, shot_location, data
                     )
-                    VALUES (%s, %s, %s, %s, %s, %s)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
                     """,
                     (
                         str(record_id),
                         str(game_id),
+                        record.get("eventNumber"),
+                        record.get("eventType", "offense"),
                         record.get("category", ""),
                         record.get("play", ""),
-                        Jsonb(record.get("counters", {})),
+                        record.get("stat", ""),
+                        Jsonb(record["shotLocation"])
+                        if record.get("shotLocation") else None,
                         Jsonb(record),
                     ),
                 )
 
-    return len(play_stats)
+    return len(events)

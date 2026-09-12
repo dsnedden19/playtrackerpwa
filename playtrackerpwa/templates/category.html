@@ -1,31 +1,66 @@
 <link rel="stylesheet" href="/static/style.css">
-
-<div class="container">
-    <h2>Select Category</h2>
-
-    <div class="button-grid">
-        <a class="button cat-man" href="/plays/Man Offense">
-            Man Offense
-        </a>
-
-        <a class="button cat-zone" href="/plays/Zone Offense">
-            Zone Offense
-        </a>
-
-        <a class="button cat-blob" href="/plays/Blob">
-            Blob
-        </a>
-
-        <a class="button cat-slob" href="/plays/Slob">
-            Slob
-        </a>
-
-        <a class="button cat-defense" href="/plays/Defense">
-            Defense
-        </a>
-
-        <a href="/" class="button" style="background-color: gray;">
-            Home
-        </a>
-    </div>
+<div class="tracker-shell">
+    <header class="tracker-header">
+        <div><h1>Live Game Tracker</h1><p id="game-label">Select an action to record an event.</p></div>
+        <a class="button small-button" href="/summary">Review Game</a>
+    </header>
+    <main class="tracker-columns">
+        <section><h2>Category</h2><div id="category-list" class="selection-list"></div></section>
+        <section><h2>Play</h2><div id="play-list" class="selection-list"></div></section>
+        <section><h2>Stat / Result</h2><div id="stat-list" class="selection-list"></div></section>
+        <section class="timeline-panel"><h2>Event Timeline</h2><div id="event-list"></div></section>
+    </main>
 </div>
+<script src="/static/storage.js"></script>
+<script>
+const config = defaultConfiguration;
+let selectedCategory = config[0];
+let selectedPlay = selectedCategory.plays[0];
+const gameId = localStorage.getItem("activeGameId");
+function makeButton(label, active, onClick) {
+    const button = document.createElement("button");
+    button.className = "selection-button" + (active ? " selected" : "");
+    button.textContent = label;
+    button.addEventListener("click", onClick);
+    return button;
+}
+function render() {
+    const categoryList = document.getElementById("category-list");
+    const playList = document.getElementById("play-list");
+    const statList = document.getElementById("stat-list");
+    categoryList.replaceChildren(); playList.replaceChildren(); statList.replaceChildren();
+    config.forEach(category => categoryList.appendChild(makeButton(category.name, category === selectedCategory, () => {
+        selectedCategory = category; selectedPlay = category.plays[0]; render();
+    })));
+    selectedCategory.plays.forEach(play => playList.appendChild(makeButton(play, play === selectedPlay, () => {
+        selectedPlay = play; render();
+    })));
+    selectedCategory.stats.forEach(stat => statList.appendChild(makeButton(stat, false, () => recordEvent(stat))));
+}
+async function recordEvent(stat) {
+    if (!gameId) return alert("Start a game before recording events.");
+    await addGameEvent(gameId, { eventType: selectedCategory.type, category: selectedCategory.name, play: selectedPlay, stat });
+    renderEvents(await loadGameEvents(gameId));
+}
+function renderEvents(events) {
+    const list = document.getElementById("event-list");
+    list.replaceChildren();
+    events.slice().reverse().forEach(event => {
+        const row = document.createElement("div");
+        row.className = "event-row";
+        row.textContent = `${event.eventNumber}. ${event.eventType} | ${event.play} | ${event.stat}`;
+        list.appendChild(row);
+    });
+}
+async function initialize() {
+    if (gameId) {
+        const game = await loadGame(gameId);
+        if (game) {
+            document.getElementById("game-label").textContent = `${game.opponent} | ${game.date} | ${game.homeaway}`;
+            renderEvents(await loadGameEvents(gameId));
+        }
+    }
+    render();
+}
+initialize();
+</script>

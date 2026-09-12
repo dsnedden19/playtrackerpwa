@@ -174,7 +174,9 @@ def upload_game():
         }, 400
 
     game = payload.get("game")
-    play_stats = payload.get("playStats")
+    events = payload.get("events")
+    if events is None:
+        events = payload.get("playStats")
 
     if not isinstance(game, dict):
         return {
@@ -182,22 +184,22 @@ def upload_game():
             "message": "Game data is missing."
         }, 400
 
-    if play_stats is None:
+    if events is None:
         return {
             "success": False,
-            "message": "Play-stat data is missing."
+            "message": "Event data is missing."
         }, 400
 
-    if not isinstance(play_stats, list) or not all(
-        isinstance(record, dict) for record in play_stats
+    if not isinstance(events, list) or not all(
+        isinstance(record, dict) for record in events
     ):
         return {
             "success": False,
-            "message": "Play-stat data must be a list of objects."
+            "message": "Event data must be a list of objects."
         }, 400
 
     try:
-        play_stat_count = save_game_upload(game, play_stats)
+        event_count = save_game_upload(game, events)
     except (RuntimeError, ValueError) as error:
         return {
             "success": False,
@@ -214,7 +216,7 @@ def upload_game():
         "success": True,
         "message": "Game saved to PostgreSQL.",
         "gameId": game.get("id"),
-        "playStatCount": play_stat_count
+        "eventCount": event_count
     }, 200
 
 

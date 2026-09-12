@@ -52,7 +52,7 @@
         }
 
         const game = await loadGame(gameId);
-        const playStats = await loadGamePlayStats(gameId);
+        const events = await loadGameEvents(gameId);
 
 if (!game) {
     summaryContainer.textContent = "Game data could not be found.";
@@ -67,24 +67,21 @@ if (!game) {
 
         summaryContainer.appendChild(heading);
 
-        playStats.forEach(record => {
-            const playHeading = document.createElement("h3");
-            playHeading.textContent =
-                record.category + " - " + record.play;
-
-            summaryContainer.appendChild(playHeading);
-
-            Object.entries(record.counters).forEach(([counter, value]) => {
-                if (value > 0) {
-                    const statLine = document.createElement("p");
-                    statLine.textContent = counter + ": " + value;
-                    summaryContainer.appendChild(statLine);
-                }
-            });
+        const counts = {};
+        events.forEach(event => {
+            const key = `${event.category} | ${event.play} | ${event.stat}`;
+            counts[key] = (counts[key] || 0) + 1;
+        });
+        const heading = document.createElement("h3");
+        heading.textContent = `${events.length} recorded events`;
+        summaryContainer.appendChild(heading);
+        Object.entries(counts).forEach(([label, count]) => {
+            const statLine = document.createElement("p");
+            statLine.textContent = `${label}: ${count}`;
+            summaryContainer.appendChild(statLine);
         });
     });
 </script>
 </div>
-
 
 
