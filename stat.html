@@ -1,0 +1,75 @@
+<link rel="stylesheet" href="/static/style.css">
+
+<div class="container">
+    <h2>{{ play }} ({{ category }})</h2>
+
+    <form id="stat-form" method="POST" data-category="{{ category }}" data-play="{{ play }}">
+        <div class="button-grid">
+            {% for c in counters %}
+                {% set color = (loop.index0 % 5) + 1 %}
+                <button class="button stat-{{ color }}"
+                        type="submit"
+                        name="counter"
+                        value="{{ c }}">
+                    {{ c }} ({{ values[c] }})
+                </button>
+            {% endfor %}
+
+            <a href="/category" class="button" style="background-color: gray;">
+                Back to Categories
+            </a>
+
+            <a href="/summary" class="button" style="background-color: black;">
+                View Summary
+            </a>
+<script src="/static/storage.js"></script>
+<script>
+    document.getElementById("stat-form").addEventListener("submit", async function (event) {
+        event.preventDefault();
+
+        const gameId = localStorage.getItem("activeGameId");
+        const category = event.currentTarget.dataset.category;
+        const play = event.currentTarget.dataset.play;
+        const counter = event.submitter.value;
+
+        const record = await incrementPlayStat(
+            gameId,
+            category,
+            play,
+            counter
+        );
+
+        event.submitter.textContent =
+            counter + " (" + record.counters[counter] + ")";
+    });
+</script>
+        </div>
+    </form>
+<script>
+    window.addEventListener("DOMContentLoaded", async function () {
+        const form = document.getElementById("stat-form");
+        const gameId = localStorage.getItem("activeGameId");
+
+        if (!form || !gameId) {
+            return;
+        }
+
+        const category = form.dataset.category;
+        const play = form.dataset.play;
+        const record = await loadPlayStats(gameId, category, play);
+
+        if (!record) {
+            return;
+        }
+
+        const buttons = form.querySelectorAll('button[name="counter"]');
+
+        buttons.forEach(button => {
+            const counter = button.value;
+            const total = record.counters[counter] || 0;
+            button.textContent = counter + " (" + total + ")";
+        });
+    });
+</script>
+</div>
+

@@ -1,0 +1,90 @@
+<link rel="stylesheet" href="/static/style.css">
+
+<div class="container">
+    <h2>Game Summary</h2>
+<div id="local-summary"></div>
+
+    {% if game %}
+        <p style="font-size: 22px;">
+            <strong>Opponent:</strong> {{ game.opponent }}<br>
+            <strong>Date:</strong> {{ game.date }}<br>
+            <strong>Location:</strong> {{ game.homeaway }}
+        </p>
+    {% endif %}
+
+    <hr style="margin: 30px 0;">
+
+    {% for category, plays in stats.items() %}
+        <h3 style="font-size: 26px; margin-top: 20px;">{{ category }}</h3>
+
+        {% for play, counters in plays.items() %}
+            <h4 style="font-size: 22px; margin-bottom: 10px;">{{ play }}</h4>
+
+            {% for counter, value in counters.items() %}
+                {% if value > 0 %}
+                    <div class="button" 
+                         style="background-color:#333; width: 80%; max-width: 400px; margin-bottom: 10px;">
+                        {{ counter }}: {{ value }}
+                    </div>
+                {% endif %}
+            {% endfor %}
+
+            <br>
+        {% endfor %}
+    {% endfor %}
+
+    <a href="/category" class="button" style="background-color: gray;">
+        Back to Categories
+    </a>
+
+    <a href="/" class="button" style="background-color: black;">
+        Home
+    </a>
+<script src="/static/storage.js"></script>
+<script>
+    window.addEventListener("DOMContentLoaded", async function () {
+        const summaryContainer = document.getElementById("local-summary");
+        const gameId = localStorage.getItem("activeGameId");
+
+        if (!gameId) {
+            summaryContainer.textContent = "No active game found.";
+            return;
+        }
+
+        const game = await loadGame(gameId);
+        const playStats = await loadGamePlayStats(gameId);
+
+if (!game) {
+    summaryContainer.textContent = "Game data could not be found.";
+    return;
+}
+
+        const heading = document.createElement("p");
+        heading.textContent =
+            game.opponent + " | " +
+            game.date + " | " +
+            game.homeaway;
+
+        summaryContainer.appendChild(heading);
+
+        playStats.forEach(record => {
+            const playHeading = document.createElement("h3");
+            playHeading.textContent =
+                record.category + " - " + record.play;
+
+            summaryContainer.appendChild(playHeading);
+
+            Object.entries(record.counters).forEach(([counter, value]) => {
+                if (value > 0) {
+                    const statLine = document.createElement("p");
+                    statLine.textContent = counter + ": " + value;
+                    summaryContainer.appendChild(statLine);
+                }
+            });
+        });
+    });
+</script>
+</div>
+
+
+
