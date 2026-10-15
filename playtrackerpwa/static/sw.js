@@ -1,4 +1,4 @@
-const CACHE_NAME = "playtracker-v30";
+const CACHE_NAME = "playtracker-v31";
 
 // Only routes that exist with no URL params. Dynamic pages
 // (/stat/<cat>/<play>, /plays/<cat>) get cached on first visit instead —
