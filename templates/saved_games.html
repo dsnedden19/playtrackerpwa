@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Saved Games</title>
+</head>
+<body>
+
+<h1>Saved Games</h1>
+
+<div id="games-list">
+Loading...
+</div>
+
+<script src="/static/storage.js"></script>
+
+<script>
+    const homeButton = document.createElement("a");
+homeButton.href = "/";
+homeButton.className = "button";
+homeButton.textContent = "Back to Home";
+document.body.appendChild(homeButton);
+async function displayGames() {
+
+    const games = await loadAllGames();
+
+   const gamesList = document.getElementById("games-list");
+
+gamesList.innerHTML = "";
+if (games.length === 0) {
+    gamesList.textContent = "No saved games found.";
+    return;
+}
+
+games.forEach(function(game) {
+    const gameItem = document.createElement("div");
+
+    gameItem.innerHTML =
+        "<h3>" + (game.opponent || "Unknown Opponent") + "</h3>" +
+        "<p>Date: " + (game.date || "No date") + "</p>" +
+        "<p>Location: " + (game.homeaway || "Not specified") + "</p>" +
+"<button type='button' onclick='resumeGame(\"" + game.id + "\")'>" +
+"Resume Game" +
+"</button>" +
+"<button type='button' onclick='deleteGame(\"" + game.id + "\")'>" +
+"Delete Game" +
+"</button>" +
+"<button type='button' onclick='prepareUpload(\"" + game.id + "\")'>" +
+"Upload Game" +
+"</button>" +
+"<hr>";
+
+    gamesList.appendChild(gameItem);
+});
+}
+function resumeGame(gameId) {
+    localStorage.setItem("activeGameId", gameId);
+    window.location.href = "/category";
+}
+async function deleteGame(gameId) {
+    const confirmed = window.confirm(
+        "Are you sure you want to delete this game?"
+    );
+
+    if (!confirmed) {
+        return;
+    }
+
+    await clearGame(gameId);
+
+    if (localStorage.getItem("activeGameId") === gameId) {
+        localStorage.removeItem("activeGameId");
+    }
+
+    await displayGames();
+}
+
+async function prepareUpload(gameId) {
+    try {
+        const payload = await buildGameUploadPayload(gameId);
+
+        const response = await fetch("/api/upload-game", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(payload)
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            throw new Error(result.message || "Upload failed.");
+        }
+
+        console.log("Flask upload response:", result);
+
+        alert(
+            "Upload received successfully.\n\n" +
+            "Game ID: " + result.gameId + "\n" +
+            "Play-stat records: " + result.playStatCount
+        );
+    } catch (error) {
+        console.error("Could not upload game:", error);
+
+        alert(
+            "Could not upload this game.\n\n" +
+            error.message
+        );
+    }
+}
+
+
+
+displayGames();
+</script>
+
+</body>
+</html>
