@@ -37,7 +37,7 @@ plays_by_category = {
     ],
     "Defense": [
         "Man", "3-2 Zone", "2-3 Zone", "Tri and 2",
-        "2-3 High Man", "2-3 High 3-2", "Shakers" "2-3 High 2-3",
+        "2-3 High Man", "2-3 High 3-2", "Shakers", "2-3 High 2-3",
         "Twilight", "Marquette", "Transition"
     ]
 }
@@ -57,9 +57,9 @@ def stat(cat, play):
     ]
 
     defense_counters = [
-        "Off Reb","2nd Chance","D Reb","D Foul",
+        "Off Reb","2nd Chance Pts","D Reb","D Foul",
         "FTM","FTA","O Foul","Tip",
-        "Turnover","Clost Out","Ran"
+        "Turnover","Close Out", "Points", "Ran"
     ]
 
     counters = defense_counters if cat == "Defense" else offense_counters
