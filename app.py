@@ -22,22 +22,22 @@ def saved_games():
 # -------------------------
 plays_by_category = {
     "Man Offense": [
-        "2 High", "4 High", "5 out", "Boston", "Box", "Celtic", "Chin",
+        "2 High", "4 High","4 High Box", "5 out", "Boston", "Box", "Celtic", "Chin",
         "Duke", "Hi Low", "Jersey", "Muchilla", "Nova", "NY",
         "Oregon", "Power", "Rub", "Texas", "Through", "Transition"
     ],
     "Zone Offense": [
-        "14", "32", "5 out", "Hi Low", "Michigan", "NY", "Sparkle"
+        "14", "32", "5 out","Chin", "Hi Low", "Hope", "Michigan", "NY", "Power", "Sparkle", "Triangle"
     ],
     "Blob": [
-        "Box", "Strong", "L", "Weak", "O", "X", "K"
+        "Box", "K", "L", "O", "Strong", "Weak", "Weak Rev", "X"
     ],
     "Slob": [
-        "Irish", "Atlanta"
+        "Atlanta", "Irish", "Slice", "Vegas"
     ],
     "Defense": [
         "Man", "3-2 Zone", "2-3 Zone", "Tri and 2",
-        "2-3 High Man", "2-3 High 3-2", "2-3 High 2-3",
+        "2-3 High Man", "2-3 High 3-2", "Shakers" "2-3 High 2-3",
         "Twilight", "Marquette", "Transition"
     ]
 }
