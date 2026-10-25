@@ -332,14 +332,15 @@ h1, h2, h3 {
 
 .shot-tracker-heading {
     display: block;
+    padding-left: 17px;
 }
 
 .shot-tracker-heading h3 {
-    margin: 0 0 2px;
+    margin: 0;
 }
 
 .shot-tracker-heading p {
-    margin: 0 0 2px;
+    margin: 0;
     color: #d0d0d0;
     font-size: .72rem;
     text-align: left;
@@ -352,6 +353,8 @@ h1, h2, h3 {
 .shot-chart-content {
     width: min(100%, 305px);
     margin: 0 auto;
+    padding-top: 21px;
+    box-sizing: border-box;
 }
 
 .shot-court {
@@ -412,7 +415,9 @@ h1, h2, h3 {
 }
 
 #selected-shot-location {
+    min-height: 0;
     margin: 0 0 2px;
+    padding-left: 17px;
     color: #fff;
     font-size: .72rem;
     font-weight: 600;
@@ -447,12 +452,6 @@ h1, h2, h3 {
 .shot-result:disabled {
     cursor: not-allowed;
     opacity: .45;
-}
-
-.shot-coordinate-help {
-    margin: 0;
-    color: #aaa;
-    font-size: .62rem;
 }
 
 /* BUTTON GRID */

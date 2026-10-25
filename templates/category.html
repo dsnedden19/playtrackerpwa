@@ -37,7 +37,7 @@
                     <h3 id="shot-tracker-title">Shot Chart</h3>
                     <p id="shot-status" role="status" aria-live="polite">Tap the court to place a shot.</p>
                 </div>
-                <p id="selected-shot-location">Tap the court to choose a location.</p>
+                <p id="selected-shot-location" aria-live="polite"></p>
                 <div class="shot-chart-row">
                     <svg id="shot-court" class="shot-court" viewBox="0 0 305 275"
                          role="application" aria-labelledby="court-title court-description">
@@ -57,7 +57,6 @@
                         <button type="button" id="shot-missed" class="shot-result missed" disabled>Miss</button>
                     </div>
                 </div>
-                <p class="shot-coordinate-help">0–1000 grid from the lower-left corner.</p>
             </div>
         </section>
     </main>
@@ -92,7 +91,7 @@
     function clearShotLocation() {
         selectedShotLocation = null;
         pendingShotMarker.replaceChildren();
-        selectedShotLocationLabel.textContent = "Tap the court to choose a location.";
+        selectedShotLocationLabel.textContent = "";
         shotMadeButton.disabled = true;
         shotMissedButton.disabled = true;
         shotStatus.textContent = gameId
