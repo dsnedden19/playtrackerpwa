@@ -204,6 +204,13 @@ h1, h2, h3 {
     gap: 10px;
 }
 
+.stats-shot-stack {
+    display: grid;
+    align-content: start;
+    gap: 0;
+    min-width: 0;
+}
+
 .selector-panel {
     min-width: 0;
     padding: 10px;
@@ -243,14 +250,6 @@ h1, h2, h3 {
     font-weight: 700;
 }
 
-.offense-option.selected {
-    background: linear-gradient(135deg, #0066ff, #009dff);
-}
-
-.defense-option.selected {
-    background: linear-gradient(135deg, #8e24aa, #c158dc);
-}
-
 .play-options {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -260,12 +259,6 @@ h1, h2, h3 {
 .play-options .selector-option {
     min-height: 48px;
 }
-
-.play-color-1.selected { background: linear-gradient(135deg, #0066ff, #009dff); }
-.play-color-2.selected { background: linear-gradient(135deg, #1cbf5b, #39e67a); }
-.play-color-3.selected { background: linear-gradient(135deg, #e53935, #ff5c5c); }
-.play-color-4.selected { background: linear-gradient(135deg, #ff7a00, #ffae42); color: #111; }
-.play-color-5.selected { background: linear-gradient(135deg, #8e24aa, #c158dc); }
 
 .stat-options {
     display: grid;
@@ -320,12 +313,10 @@ h1, h2, h3 {
 }
 
 .shot-tracker {
-    grid-column: 3;
     box-sizing: border-box;
     width: 100%;
-    justify-self: center;
     align-self: start;
-    margin: 0;
+    margin: 2px 0 0;
     padding: 0;
     border: 0;
     background: transparent;
@@ -364,12 +355,12 @@ h1, h2, h3 {
 }
 
 .court-backdrop {
-    fill: #858585;
+    fill: #292929;
 }
 
 .court-image {
-    filter: invert(1) grayscale(1);
-    mix-blend-mode: screen;
+    filter: none;
+    mix-blend-mode: normal;
 }
 
 .court-tap-area {
@@ -501,7 +492,7 @@ a {
 
     .selector-board {
         grid-template-columns: minmax(110px, .8fr) minmax(175px, 1.35fr)
-            minmax(400px, 3fr);
+            minmax(0, 3fr);
         column-gap: 7px;
         row-gap: 0;
     }
@@ -521,6 +512,15 @@ a {
     .inline-stat-label {
         padding-left: 2px;
         font-size: .58rem;
+    }
+
+    .shot-chart-content {
+        grid-template-columns: minmax(80px, 1fr) minmax(0, 305px) 60px;
+        width: 100%;
+    }
+
+    .shot-result-buttons {
+        width: 60px;
     }
 }
 
