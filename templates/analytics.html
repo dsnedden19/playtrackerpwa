@@ -32,6 +32,10 @@
                 <option value="Offense">Offense</option>
                 <option value="Defense">Defense</option>
             </select>
+            <label for="analytics-play">Play</label>
+            <select id="analytics-play">
+                <option value="all">All plays</option>
+            </select>
         </section>
 
         <p id="analytics-status" class="analytics-status" role="status" aria-live="polite">
@@ -160,6 +164,7 @@
     <script>
         const gameSelect = document.getElementById("analytics-game");
         const categorySelect = document.getElementById("analytics-category");
+        const playSelect = document.getElementById("analytics-play");
         const statusMessage = document.getElementById("analytics-status");
         const content = document.getElementById("analytics-content");
         const markerLayer = document.getElementById("analytics-shot-markers");
@@ -238,10 +243,20 @@
             });
         }
 
-        function renderPlayPie(values, pieId, legendId, emptyId, emptyMessage) {
-            const entries = [...values.entries()]
+        function renderPlayPie(values, pieId, legendId, emptyId, emptyMessage, selectedPlay) {
+            let entries = [...values.entries()]
                 .filter(([, value]) => value > 0)
                 .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+            if (selectedPlay !== "all") {
+                const selectedValue = values.get(selectedPlay) || 0;
+                const otherValue = entries.reduce(
+                    (sum, [play, value]) => sum + (play === selectedPlay ? 0 : value),
+                    0
+                );
+                entries = selectedValue > 0
+                    ? [[selectedPlay, selectedValue], ...(otherValue > 0 ? [["All other plays", otherValue]] : [])]
+                    : [];
+            }
             const total = entries.reduce((sum, [, value]) => sum + value, 0);
             const pie = document.getElementById(pieId);
             const legend = document.getElementById(legendId);
@@ -287,7 +302,7 @@
             );
         }
 
-        function renderOffensivePlayAnalysis(games) {
+        function renderOffensivePlayAnalysis(games, selectedPlay) {
             const ranByPlay = new Map();
             const pointsByPlay = new Map();
 
@@ -323,19 +338,22 @@
                 "ran-play-pie",
                 "ran-play-legend",
                 "ran-play-empty",
-                "No offensive Ran counts for this game selection."
+                "No offensive Ran counts for this play selection.",
+                selectedPlay
             );
             renderPlayPie(
                 pointsByPlay,
                 "points-play-pie",
                 "points-play-legend",
                 "points-play-empty",
-                "No calculated offensive points for this game selection."
+                "No calculated offensive points for this play selection.",
+                selectedPlay
             );
         }
 
         function renderStatAnalysis(games) {
             const categoryFilter = categorySelect.value;
+            const selectedPlay = playSelect.value;
             const totals = new Map();
             const playRows = [];
             let recordCount = 0;
@@ -346,6 +364,12 @@
                         categoryFilter !== "all" &&
                         record.category !== categoryFilter &&
                         !String(record.category || "").toLowerCase().includes(categoryFilter.toLowerCase())
+                    ) {
+                        return;
+                    }
+                    if (
+                        selectedPlay !== "all" &&
+                        String(record.play || "Unnamed play") !== selectedPlay
                     ) {
                         return;
                     }
@@ -426,13 +450,47 @@
 
         function renderAnalytics() {
             const games = selectedGames();
-            renderShotAnalysis(games);
+            updatePlayOptions(games);
+            const selectedPlay = playSelect.value;
+            const filteredGames = selectedPlay === "all"
+                ? games
+                : games.map(item => ({
+                    ...item,
+                    shots: item.shots.filter(shot => shot.play === selectedPlay)
+                }));
+            renderShotAnalysis(filteredGames);
             renderStatAnalysis(games);
-            renderOffensivePlayAnalysis(games);
+            renderOffensivePlayAnalysis(games, selectedPlay);
             statusMessage.textContent = games.length
-                ? `Showing analytics for ${games.length} ${games.length === 1 ? "game" : "games"}.`
+                ? `Showing analytics for ${games.length} ${games.length === 1 ? "game" : "games"}${selectedPlay === "all" ? "" : ` · ${selectedPlay}`}.`
                 : "No saved games match this selection.";
             content.hidden = false;
+        }
+
+        function updatePlayOptions(games) {
+            const selectedPlay = playSelect.value;
+            const plays = new Set();
+            games.forEach(({ playStats, shots }) => {
+                playStats.forEach(record => {
+                    plays.add(String(record.play || "Unnamed play"));
+                });
+                shots.forEach(shot => {
+                    if (shot.play) plays.add(String(shot.play));
+                });
+            });
+
+            playSelect.replaceChildren();
+            const allPlaysOption = document.createElement("option");
+            allPlaysOption.value = "all";
+            allPlaysOption.textContent = "All plays";
+            playSelect.appendChild(allPlaysOption);
+            [...plays].sort((a, b) => a.localeCompare(b)).forEach(play => {
+                const option = document.createElement("option");
+                option.value = play;
+                option.textContent = play;
+                playSelect.appendChild(option);
+            });
+            playSelect.value = plays.has(selectedPlay) ? selectedPlay : "all";
         }
 
         async function initializeAnalytics() {
@@ -463,6 +521,7 @@
 
         gameSelect.addEventListener("change", renderAnalytics);
         categorySelect.addEventListener("change", renderAnalytics);
+        playSelect.addEventListener("change", renderAnalytics);
         initializeAnalytics().catch(error => {
             console.error("Could not load analytics:", error);
             statusMessage.textContent = "Could not load analytics from this device.";
