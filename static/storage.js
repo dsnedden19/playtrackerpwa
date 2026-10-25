@@ -125,7 +125,11 @@ async function clearGame(id) {
 function createPlayStatsId(gameId, category, play) {
     return `${gameId}|${category}|${play}`;
 }
-async function incrementPlayStat(gameId, category, play, counter) {
+async function adjustPlayStat(gameId, category, play, counter, delta) {
+    if (!gameId || !category || !play || !counter) {
+        throw new Error("Game, category, play, and counter are required.");
+    }
+
     const db = await openDB();
     const id = createPlayStatsId(gameId, category, play);
 
@@ -145,8 +149,11 @@ async function incrementPlayStat(gameId, category, play, counter) {
                 updatedAt: Date.now()
             };
 
-            record.counters[counter] =
-                (record.counters[counter] || 0) + 1;
+            const currentValue = Number(record.counters[counter] || 0);
+            record.counters[counter] = Math.max(
+                0,
+                currentValue + Number(delta)
+            );
 
             record.synced = false;
             record.updatedAt = Date.now();
@@ -159,6 +166,14 @@ async function incrementPlayStat(gameId, category, play, counter) {
 
         request.onerror = event => reject(event.target.error);
     });
+}
+
+async function incrementPlayStat(gameId, category, play, counter) {
+    return adjustPlayStat(gameId, category, play, counter, 1);
+}
+
+async function decrementPlayStat(gameId, category, play, counter) {
+    return adjustPlayStat(gameId, category, play, counter, -1);
 }
 async function loadPlayStats(gameId, category, play) {
     const db = await openDB();

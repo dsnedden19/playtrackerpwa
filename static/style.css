@@ -91,6 +91,49 @@ h1, h2, h3 {
     background: linear-gradient(135deg, #8e24aa, #c158dc);
 }
 
+/* Split stat controls retain the original stat-button gradients. */
+.stat-grid .stat-counter {
+    display: flex;
+    align-items: stretch;
+    justify-content: space-between;
+    min-height: 64px;
+    padding: 0;
+    overflow: hidden;
+}
+
+.stat-adjust {
+    flex: 0 0 56px;
+    border: 0;
+    background: rgba(0, 0, 0, .16);
+    color: inherit;
+    font-size: 1.8rem;
+    font-weight: 700;
+    touch-action: manipulation;
+}
+
+.stat-adjust:hover:not(:disabled) {
+    background: rgba(0, 0, 0, .28);
+}
+
+.stat-adjust:disabled {
+    opacity: .65;
+}
+
+.stat-label {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 8px;
+    color: inherit;
+}
+
+.stat-name,
+.stat-total {
+    font-weight: 700;
+}
+
 /* BUTTON GRID */
 .button-grid {
     display: grid;
