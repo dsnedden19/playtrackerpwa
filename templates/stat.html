@@ -7,25 +7,26 @@
         {% for c in counters %}
             {% set color = (loop.index0 % 5) + 1 %}
             <div class="stat-card stat-{{ color }}">
-                <div class="stat-card-header">{{ c }}</div>
-                <div class="stat-total">{{ values[c] }}</div>
-
                 <div class="stat-split">
                     <button
                         type="button"
                         class="stat-half stat-half-left"
                         data-counter="{{ c }}"
-                        data-delta="1"
-                        aria-label="Add 1 to {{ c }}">
-                        +1
+                        data-delta="-1"
+                        aria-label="Subtract 1 from {{ c }}">
+                        −
                     </button>
+                    <div class="stat-label">
+                        <span class="stat-card-header">{{ c }}</span>
+                        <span class="stat-total">{{ values[c] }}</span>
+                    </div>
                     <button
                         type="button"
                         class="stat-half stat-half-right"
                         data-counter="{{ c }}"
-                        data-delta="-1"
-                        aria-label="Subtract 1 from {{ c }}">
-                        −1
+                        data-delta="1"
+                        aria-label="Add 1 to {{ c }}">
+                        +
                     </button>
                 </div>
             </div>

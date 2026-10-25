@@ -94,46 +94,62 @@ h1, h2, h3 {
 /* Counter controls */
 .stat-card {
     min-width: 0;
-    padding: 14px;
+    padding: 0;
     border-radius: 14px;
     color: white;
     box-shadow: 0 4px 10px rgba(0, 0, 0, .35);
 }
 
 .stat-card-header {
-    min-height: 2.5em;
     font-weight: 700;
 }
 
 .stat-total {
-    margin: 10px 0 14px;
-    font-size: 2rem;
     font-weight: 700;
 }
 
 .stat-split {
     display: flex;
-    gap: 4px;
+    min-height: 68px;
+    align-items: stretch;
+    justify-content: space-between;
 }
 
 .stat-half {
-    flex: 1;
-    min-height: 52px;
+    flex: 0 0 58px;
     border: 0;
     color: white;
-    font-size: 1.25rem;
+    background: rgba(0, 0, 0, .16);
+    font-size: 1.8rem;
     font-weight: 700;
     touch-action: manipulation;
 }
 
 .stat-half-left {
-    border-radius: 10px 4px 4px 10px;
-    background: #168344;
+    border-radius: 14px 0 0 14px;
 }
 
 .stat-half-right {
-    border-radius: 4px 10px 10px 4px;
-    background: #a83232;
+    border-radius: 0 14px 14px 0;
+}
+
+.stat-label {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 8px;
+    font-size: 1rem;
+    text-align: center;
+}
+
+.stat-4 {
+    color: #111;
+}
+
+.stat-4 .stat-half {
+    color: #111;
 }
 
 .stat-half:disabled {
