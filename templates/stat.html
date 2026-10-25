@@ -11,21 +11,22 @@
                 <div class="stat-total">{{ values[c] }}</div>
 
                 <div class="stat-split">
-                    <form method="POST" class="stat-form">
-                        <input type="hidden" name="counter" value="{{ c }}">
-                        <input type="hidden" name="delta" value="-1">
-                        <button type="submit" class="stat-half stat-half-left" aria-label="Subtract 1 from {{ c }}">
-                            −1
-                        </button>
-                    </form>
-
-                    <form method="POST" class="stat-form">
-                        <input type="hidden" name="counter" value="{{ c }}">
-                        <input type="hidden" name="delta" value="1">
-                        <button type="submit" class="stat-half stat-half-right" aria-label="Add 1 to {{ c }}">
-                            +1
-                        </button>
-                    </form>
+                    <button
+                        type="button"
+                        class="stat-half stat-half-left"
+                        data-counter="{{ c }}"
+                        data-delta="1"
+                        aria-label="Add 1 to {{ c }}">
+                        +1
+                    </button>
+                    <button
+                        type="button"
+                        class="stat-half stat-half-right"
+                        data-counter="{{ c }}"
+                        data-delta="-1"
+                        aria-label="Subtract 1 from {{ c }}">
+                        −1
+                    </button>
                 </div>
             </div>
         {% endfor %}
@@ -34,3 +35,59 @@
         <a href="/summary" class="button dark-btn">View Summary</a>
     </div>
 </div>
+
+<script src="/static/storage.js"></script>
+<script>
+    const gameId = localStorage.getItem("activeGameId");
+    const category = {{ category | tojson }};
+    const play = {{ play | tojson }};
+
+    async function loadDisplayedCounts() {
+        if (!gameId) {
+            return;
+        }
+
+        const record = await loadPlayStats(gameId, category, play);
+        document.querySelectorAll(".stat-card").forEach(card => {
+            const counter = card.querySelector(".stat-half").dataset.counter;
+            card.querySelector(".stat-total").textContent =
+                record?.counters?.[counter] ?? 0;
+        });
+    }
+
+    document.querySelectorAll(".stat-half").forEach(button => {
+        button.addEventListener("click", async () => {
+            if (!gameId) {
+                alert("Start or resume a game before changing stats.");
+                return;
+            }
+
+            const card = button.closest(".stat-card");
+            const total = card.querySelector(".stat-total");
+            const counter = button.dataset.counter;
+            const delta = Number(button.dataset.delta);
+
+            button.disabled = true;
+            try {
+                const record = await adjustPlayStat(
+                    gameId,
+                    category,
+                    play,
+                    counter,
+                    delta
+                );
+                total.textContent = record.counters[counter];
+            } catch (error) {
+                console.error("Could not update stat:", error);
+                alert("Could not update this stat. Please try again.");
+            } finally {
+                button.disabled = false;
+            }
+        });
+    });
+
+    loadDisplayedCounts().catch(error => {
+        console.error("Could not load stat counts:", error);
+        alert("Could not load the saved stats for this play.");
+    });
+</script>

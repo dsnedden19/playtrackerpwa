@@ -91,6 +91,55 @@ h1, h2, h3 {
     background: linear-gradient(135deg, #8e24aa, #c158dc);
 }
 
+/* Counter controls */
+.stat-card {
+    min-width: 0;
+    padding: 14px;
+    border-radius: 14px;
+    color: white;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, .35);
+}
+
+.stat-card-header {
+    min-height: 2.5em;
+    font-weight: 700;
+}
+
+.stat-total {
+    margin: 10px 0 14px;
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+.stat-split {
+    display: flex;
+    gap: 4px;
+}
+
+.stat-half {
+    flex: 1;
+    min-height: 52px;
+    border: 0;
+    color: white;
+    font-size: 1.25rem;
+    font-weight: 700;
+    touch-action: manipulation;
+}
+
+.stat-half-left {
+    border-radius: 10px 4px 4px 10px;
+    background: #168344;
+}
+
+.stat-half-right {
+    border-radius: 4px 10px 10px 4px;
+    background: #a83232;
+}
+
+.stat-half:disabled {
+    opacity: .65;
+}
+
 /* BUTTON GRID */
 .button-grid {
     display: grid;
