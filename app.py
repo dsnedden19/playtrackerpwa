@@ -30,13 +30,13 @@ plays_by_category = {
         "14", "32", "5 out","Chin", "Hi Low", "Hope", "Michigan", "NY", "Power", "Sparkle", "Triangle"
     ],
     "Blob": [
-        "Box", "K", "L", "O", "Strong", "Weak", "Weak Rev", "X"
+        "Box","J", "K", "L", "O", "Strong", "Weak", "Weak Rev", "X"
     ],
     "Slob": [
         "Atlanta", "Irish", "Slice", "Vegas"
     ],
     "Defense": [
-        "Man", "3-2 Zone", "2-3 Zone", "Tri and 2",
+        "Man", "1-3-1", "3-2 Zone", "2-3 Zone", "Tri and 2",
         "2-3 High Man", "2-3 High 3-2", "Shakers", "2-3 High 2-3",
         "Twilight", "Marquette", "Transition"
     ]
