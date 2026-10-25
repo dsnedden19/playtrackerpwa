@@ -231,6 +231,20 @@
                 : analyticsGames.filter(item => item.game.id === selectedId);
         }
 
+        function matchesCategory(category) {
+            const selectedCategory = categorySelect.value;
+            if (selectedCategory === "all") {
+                return true;
+            }
+            const normalized = String(category || "").trim().toLowerCase();
+            if (selectedCategory === "Offense") {
+                return OFFENSIVE_CATEGORIES.has(normalized) ||
+                    normalized.includes("offense");
+            }
+            return normalized === selectedCategory.toLowerCase() ||
+                normalized.includes(selectedCategory.toLowerCase());
+        }
+
         function renderShotAnalysis(games) {
             const shots = games.flatMap(item => item.shots);
             const made = shots.filter(shot => shot.result === "made").length;
@@ -363,7 +377,6 @@
         }
 
         function renderStatAnalysis(games) {
-            const categoryFilter = categorySelect.value;
             const selectedPlay = playSelect.value;
             const totals = new Map();
             const playRows = [];
@@ -371,11 +384,7 @@
 
             games.forEach(({ playStats }) => {
                 playStats.forEach(record => {
-                    if (
-                        categoryFilter !== "all" &&
-                        record.category !== categoryFilter &&
-                        !String(record.category || "").toLowerCase().includes(categoryFilter.toLowerCase())
-                    ) {
+                    if (!matchesCategory(record.category)) {
                         return;
                     }
                     if (
@@ -468,10 +477,15 @@
             updatePlayOptions(games);
             const selectedPlay = playSelect.value;
             const filteredGames = selectedPlay === "all"
-                ? games
+                ? games.map(item => ({
+                    ...item,
+                    shots: item.shots.filter(shot => matchesCategory(shot.category))
+                }))
                 : games.map(item => ({
                     ...item,
-                    shots: item.shots.filter(shot => shot.play === selectedPlay)
+                    shots: item.shots.filter(shot =>
+                        shot.play === selectedPlay && matchesCategory(shot.category)
+                    )
                 }));
             renderShotAnalysis(filteredGames);
             renderStatAnalysis(games);
@@ -487,10 +501,14 @@
             const plays = new Set();
             games.forEach(({ playStats, shots }) => {
                 playStats.forEach(record => {
-                    plays.add(String(record.play || "Unnamed play"));
+                    if (matchesCategory(record.category)) {
+                        plays.add(String(record.play || "Unnamed play"));
+                    }
                 });
                 shots.forEach(shot => {
-                    if (shot.play) plays.add(String(shot.play));
+                    if (shot.play && matchesCategory(shot.category)) {
+                        plays.add(String(shot.play));
+                    }
                 });
             });
 
