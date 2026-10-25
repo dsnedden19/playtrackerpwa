@@ -195,6 +195,12 @@
             { label: "FT %", made: ["FTM"], attempts: ["FTA"] }
         ];
         const STAT_COUNTS = ["O Reb", "2nd Chance", "Turnover"];
+        const DEFENSIVE_STAT_COUNTS = [
+            ["Turnover", "Turnovers"],
+            ["D Reb", "D Reb"],
+            ["Off Reb", "Off Reb"],
+            ["2nd Chance Pts", "2nd Chance Pts"]
+        ];
         let analyticsGames = [];
 
         function makeShotMarker(shot) {
@@ -379,14 +385,13 @@
         function renderStatAnalysis(games) {
             const selectedPlay = playSelect.value;
             const totals = new Map();
+            const offenseTotals = new Map();
+            const defenseTotals = new Map();
             const playRows = [];
             let recordCount = 0;
 
             games.forEach(({ playStats }) => {
                 playStats.forEach(record => {
-                    if (!matchesCategory(record.category)) {
-                        return;
-                    }
                     if (
                         selectedPlay !== "all" &&
                         String(record.play || "Unnamed play") !== selectedPlay
@@ -396,6 +401,25 @@
                     const counters = record.counters || {};
                     const nonzeroCounters = Object.entries(counters)
                         .filter(([, value]) => Number(value) > 0);
+                    const normalizedCategory = String(record.category || "")
+                        .trim()
+                        .toLowerCase();
+                    const categoryTotals = OFFENSIVE_CATEGORIES.has(normalizedCategory)
+                        ? offenseTotals
+                        : normalizedCategory === "defense"
+                            ? defenseTotals
+                            : null;
+                    if (categoryTotals) {
+                        nonzeroCounters.forEach(([counter, value]) => {
+                            categoryTotals.set(
+                                counter,
+                                (categoryTotals.get(counter) || 0) + Number(value)
+                            );
+                        });
+                    }
+                    if (!matchesCategory(record.category)) {
+                        return;
+                    }
                     if (nonzeroCounters.length) recordCount += 1;
                     const total = nonzeroCounters.reduce((sum, [counter, value]) => {
                         const count = Number(value) || 0;
@@ -416,35 +440,72 @@
             document.getElementById("stat-record-total").textContent = recordCount;
             const statChart = document.getElementById("stat-chart");
             statChart.replaceChildren();
-            const summaryCards = [
-                ...SHOOTING_PERCENTAGES.map(({ label, made, attempts }) => {
-                    const madeTotal = made.reduce(
-                        (sum, counter) => sum + (totals.get(counter) || 0),
-                        0
-                    );
-                    const attemptTotal = attempts.reduce(
-                        (sum, counter) => sum + (totals.get(counter) || 0),
-                        0
-                    );
-                    return {
-                        label,
-                        value: `${(attemptTotal ? (madeTotal / attemptTotal) * 100 : 0).toFixed(2)}%`
-                    };
-                }),
-                ...STAT_COUNTS.map(counter => ({
-                    label: counter === "Turnover" ? "Turnovers" : counter,
-                    value: totals.get(counter) || 0
-                }))
-            ];
-            summaryCards.forEach(({ label, value }) => {
-                const card = document.createElement("article");
-                card.className = "stat-summary-card";
-                const title = document.createElement("span");
-                title.textContent = label;
-                const result = document.createElement("strong");
-                result.textContent = value;
-                card.append(title, result);
-                statChart.appendChild(card);
+            const showBoth = categorySelect.value === "all";
+            const summaryGroups = [];
+            if (categorySelect.value !== "Defense") {
+                summaryGroups.push({
+                    label: "Offense",
+                    totals: offenseTotals,
+                    cards: [
+                        ...SHOOTING_PERCENTAGES.map(({ label, made, attempts }) => ({
+                            label,
+                            made,
+                            attempts
+                        })),
+                        ...STAT_COUNTS.map(counter => ({
+                            label: counter === "Turnover" ? "Turnovers" : counter,
+                            count: counter
+                        }))
+                    ]
+                });
+            }
+            if (categorySelect.value !== "Offense") {
+                summaryGroups.push({
+                    label: "Defense",
+                    totals: defenseTotals,
+                    cards: [
+                        ...DEFENSIVE_STAT_COUNTS.map(([counter, label]) => ({
+                            label,
+                            count: counter
+                        })),
+                        { label: "Points from FT", made: ["FTM"], attempts: ["Points"] }
+                    ]
+                });
+            }
+            summaryGroups.forEach(group => {
+                if (showBoth) {
+                    const heading = document.createElement("h3");
+                    heading.className = "stat-summary-heading";
+                    heading.textContent = group.label;
+                    statChart.appendChild(heading);
+                }
+                group.cards.forEach(({ label, made, attempts, count }) => {
+                    const value = count
+                        ? group.totals.get(count) || 0
+                        : (() => {
+                            const madeTotal = made.reduce(
+                                (sum, counter) =>
+                                    sum + (group.totals.get(counter) || 0),
+                                0
+                            );
+                            const attemptTotal = attempts.reduce(
+                                (sum, counter) =>
+                                    sum + (group.totals.get(counter) || 0),
+                                0
+                            );
+                            return `${(
+                                attemptTotal ? (madeTotal / attemptTotal) * 100 : 0
+                            ).toFixed(2)}%`;
+                        })();
+                    const card = document.createElement("article");
+                    card.className = "stat-summary-card";
+                    const title = document.createElement("span");
+                    title.textContent = label;
+                    const result = document.createElement("strong");
+                    result.textContent = value;
+                    card.append(title, result);
+                    statChart.appendChild(card);
+                });
             });
 
             const rows = document.getElementById("play-stat-rows");
