@@ -305,9 +305,19 @@
         "3ptA": "offense-stat-red",
         "FTA": "offense-stat-red",
         "O Foul": "offense-stat-red",
+        "D Foul": "offense-stat-red",
         "Turnover": "offense-stat-red",
         "O Reb": "offense-stat-orange",
         "2nd Chance": "offense-stat-orange",
+        "Ran": "offense-stat-blue"
+    };
+    const defenseStatColors = {
+        "Off Reb": "offense-stat-orange",
+        "2nd Chance Pts": "offense-stat-orange",
+        "Close Out": "offense-stat-orange",
+        "Tip": "offense-stat-green",
+        "Turnover": "offense-stat-green",
+        "Points": "offense-stat-red",
         "Ran": "offense-stat-blue"
     };
 
@@ -332,7 +342,7 @@
             const card = document.createElement("div");
             const statColor = selectedCategory === "Offense"
                 ? offenseStatColors[counter] || `stat-${(index % 5) + 1}`
-                : `stat-${(index % 5) + 1}`;
+                : defenseStatColors[counter] || `stat-${(index % 5) + 1}`;
             card.className = `inline-stat ${statColor}`;
 
             const minusButton = document.createElement("button");
