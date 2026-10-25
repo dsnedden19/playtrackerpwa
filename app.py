@@ -202,6 +202,7 @@ def upload_game():
 
     game = payload.get("game")
     play_stats = payload.get("playStats")
+    shots = payload.get("shots", [])
 
     if not isinstance(game, dict):
         return {
@@ -223,8 +224,16 @@ def upload_game():
             "message": "Play-stat data must be a list of objects."
         }, 400
 
+    if not isinstance(shots, list) or not all(
+        isinstance(shot, dict) for shot in shots
+    ):
+        return {
+            "success": False,
+            "message": "Shot data must be a list of objects."
+        }, 400
+
     try:
-        play_stat_count = save_game_upload(game, play_stats)
+        upload_counts = save_game_upload(game, play_stats, shots)
     except (RuntimeError, ValueError) as error:
         return {
             "success": False,
@@ -241,7 +250,7 @@ def upload_game():
         "success": True,
         "message": "Game saved to PostgreSQL.",
         "gameId": game.get("id"),
-        "playStatCount": play_stat_count
+        **upload_counts
     }, 200
 
 

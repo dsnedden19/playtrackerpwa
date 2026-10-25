@@ -99,7 +99,8 @@ async function prepareUpload(gameId) {
         alert(
             "Upload received successfully.\n\n" +
             "Game ID: " + result.gameId + "\n" +
-            "Play-stat records: " + result.playStatCount
+            "Play-stat records: " + result.playStatCount + "\n" +
+            "Shot attempts: " + result.shotCount
         );
     } catch (error) {
         console.error("Could not upload game:", error);

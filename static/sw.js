@@ -1,4 +1,4 @@
-const CACHE_NAME = "playtracker-v30";
+const CACHE_NAME = "playtracker-v31";
 
 // The install handler also precaches every generated category and play page
 // returned by /api/offline-urls.

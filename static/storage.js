@@ -1,7 +1,8 @@
 const DB_NAME = "playtracker_.db";
-const DB_VERSION = 5;
+const DB_VERSION = 6;
 const STORE_NAME = "games";
 const PLAY_STATS_STORE_NAME = "play_stats";
+const SHOTS_STORE_NAME = "shots";
 
 let dbInstance = null;
 
@@ -55,6 +56,17 @@ function openDB() {
                     "synced",
                     { unique: false }
                 );
+            }
+
+            if (!db.objectStoreNames.contains(SHOTS_STORE_NAME)) {
+                const shotsStore = db.createObjectStore(
+                    SHOTS_STORE_NAME,
+                    { keyPath: "id" }
+                );
+                shotsStore.createIndex("gameId", "gameId", { unique: false });
+                shotsStore.createIndex("gamePlay", ["gameId", "play"], {
+                    unique: false
+                });
             }
         };
 
@@ -114,13 +126,22 @@ async function loadAllGames() {
 
 async function clearGame(id) {
     const db = await openDB();
-    return new Promise((resolve, reject) => {
-        const tx = db.transaction(STORE_NAME, "readwrite");
-        const store = tx.objectStore(STORE_NAME);
-        const request = store.delete(id);
+    const [playStats, shots] = await Promise.all([
+        loadGamePlayStats(id),
+        loadGameShots(id)
+    ]);
 
-        request.onsuccess = () => resolve();
-        request.onerror = (event) => reject(event.target.error);
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction(
+            [STORE_NAME, PLAY_STATS_STORE_NAME, SHOTS_STORE_NAME],
+            "readwrite"
+        );
+        tx.objectStore(STORE_NAME).delete(id);
+        playStats.forEach(record => tx.objectStore(PLAY_STATS_STORE_NAME).delete(record.id));
+        shots.forEach(shot => tx.objectStore(SHOTS_STORE_NAME).delete(shot.id));
+        tx.oncomplete = () => resolve();
+        tx.onerror = event => reject(event.target.error);
+        tx.onabort = event => reject(event.target.error);
     });
 }
 
@@ -210,6 +231,43 @@ async function loadGamePlayStats(gameId) {
     });
 }
 
+async function recordShotAttempt(gameId, shotData) {
+    if (!gameId || !shotData?.category || !shotData?.type ||
+        !shotData?.play || !shotData?.zone || !["made", "missed"].includes(shotData.result)) {
+        throw new Error("Game, category, type, play, shot zone, and result are required.");
+    }
+
+    const db = await openDB();
+    const shot = {
+        id: crypto.randomUUID(),
+        gameId,
+        ...shotData,
+        recordedAt: new Date().toISOString(),
+        synced: false
+    };
+
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction(SHOTS_STORE_NAME, "readwrite");
+        const request = tx.objectStore(SHOTS_STORE_NAME).add(shot);
+        request.onsuccess = () => resolve(shot);
+        request.onerror = event => reject(event.target.error);
+    });
+}
+
+async function loadGameShots(gameId) {
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+        const request = db.transaction(SHOTS_STORE_NAME, "readonly")
+            .objectStore(SHOTS_STORE_NAME)
+            .index("gameId")
+            .getAll(gameId);
+        request.onsuccess = () => resolve(
+            request.result.sort((a, b) => a.recordedAt.localeCompare(b.recordedAt))
+        );
+        request.onerror = event => reject(event.target.error);
+    });
+}
+
 async function buildGameUploadPayload(gameId) {
     const game = await loadGame(gameId);
 
@@ -218,10 +276,12 @@ async function buildGameUploadPayload(gameId) {
     }
 
     const playStats = await loadGamePlayStats(gameId);
+    const shots = await loadGameShots(gameId);
 
     return {
         game: game,
         playStats: playStats,
+        shots: shots,
         uploadedAt: new Date().toISOString()
     };
 }

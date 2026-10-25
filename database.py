@@ -24,10 +24,11 @@ def _url_with_connect_timeout(url, timeout=5):
     return f"{url}{sep}connect_timeout={timeout}"
 
 
-def save_game_upload(game, play_stats):
+def save_game_upload(game, play_stats, shots=None):
     game_id = game.get("id")
     if not game_id:
         raise ValueError("Game data must include an id.")
+    shots = shots or []
 
     url = _database_url()
     url_with_timeout = _url_with_connect_timeout(url, timeout=5)
@@ -62,6 +63,21 @@ def save_game_upload(game, play_stats):
                 )
                 cursor.execute(
                     """
+                    CREATE TABLE IF NOT EXISTS shots (
+                        id TEXT PRIMARY KEY,
+                        game_id TEXT NOT NULL REFERENCES games(id) ON DELETE CASCADE,
+                        category TEXT NOT NULL,
+                        type TEXT NOT NULL,
+                        play TEXT NOT NULL,
+                        zone TEXT NOT NULL,
+                        result TEXT NOT NULL CHECK (result IN ('made', 'missed')),
+                        recorded_at TIMESTAMPTZ NOT NULL,
+                        data JSONB NOT NULL
+                    )
+                    """
+                )
+                cursor.execute(
+                    """
                     INSERT INTO games (id, opponent, game_date, homeaway, data)
                     VALUES (%s, %s, %s, %s, %s)
                     ON CONFLICT (id) DO UPDATE SET
@@ -81,6 +97,7 @@ def save_game_upload(game, play_stats):
                 )
                 # Remove any previous play_stats for this game before re-inserting
                 cursor.execute("DELETE FROM play_stats WHERE game_id = %s", (str(game_id),))
+                cursor.execute("DELETE FROM shots WHERE game_id = %s", (str(game_id),))
 
                 for record in play_stats:
                     record_id = record.get("id")
@@ -117,6 +134,40 @@ def save_game_upload(game, play_stats):
                         # error message; include just the record id and the error.
                         raise RuntimeError(f"Failed inserting play_stat id={record_id}: {rec_e}") from rec_e
 
+                for shot in shots:
+                    shot_id = shot.get("id")
+                    if not shot_id:
+                        raise ValueError("Every shot record must include an id.")
+                    if shot.get("result") not in ("made", "missed"):
+                        raise ValueError(f"Shot id={shot_id} has an invalid result.")
+                    if not all(shot.get(field) for field in (
+                        "category", "type", "play", "zone", "recordedAt"
+                    )):
+                        raise ValueError(
+                            f"Shot id={shot_id} is missing required shot details."
+                        )
+
+                    cursor.execute(
+                        """
+                        INSERT INTO shots (
+                            id, game_id, category, type, play, zone,
+                            result, recorded_at, data
+                        )
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                        """,
+                        (
+                            str(shot_id),
+                            str(game_id),
+                            shot.get("category", ""),
+                            shot.get("type", ""),
+                            shot.get("play", ""),
+                            shot.get("zone", ""),
+                            shot["result"],
+                            shot.get("recordedAt"),
+                            Jsonb(shot),
+                        ),
+                    )
+
     except Exception as e:
         # If this is a connection/operational error, convert to a clearer
         # RuntimeError so the Flask handler will return a 503 with a helpful
@@ -144,4 +195,4 @@ def save_game_upload(game, play_stats):
         # Re-raise other exceptions (ValueError for missing ids will bubble up)
         raise
 
-    return len(play_stats)
+    return {"playStatCount": len(play_stats), "shotCount": len(shots)}
