@@ -70,11 +70,19 @@ def save_game_upload(game, play_stats, shots=None):
                         type TEXT NOT NULL,
                         play TEXT NOT NULL,
                         zone TEXT NOT NULL,
+                        x_coordinate INTEGER,
+                        y_coordinate INTEGER,
                         result TEXT NOT NULL CHECK (result IN ('made', 'missed')),
                         recorded_at TIMESTAMPTZ NOT NULL,
                         data JSONB NOT NULL
                     )
                     """
+                )
+                cursor.execute(
+                    "ALTER TABLE shots ADD COLUMN IF NOT EXISTS x_coordinate INTEGER"
+                )
+                cursor.execute(
+                    "ALTER TABLE shots ADD COLUMN IF NOT EXISTS y_coordinate INTEGER"
                 )
                 cursor.execute(
                     """
@@ -146,14 +154,32 @@ def save_game_upload(game, play_stats, shots=None):
                         raise ValueError(
                             f"Shot id={shot_id} is missing required shot details."
                         )
+                    x_coordinate = shot.get("x")
+                    y_coordinate = shot.get("y")
+                    if (x_coordinate is None) != (y_coordinate is None):
+                        raise ValueError(
+                            f"Shot id={shot_id} must include both court coordinates."
+                        )
+                    if x_coordinate is not None and (
+                        isinstance(x_coordinate, bool)
+                        or isinstance(y_coordinate, bool)
+                        or not isinstance(x_coordinate, int)
+                        or not isinstance(y_coordinate, int)
+                        or not 0 <= x_coordinate <= 1000
+                        or not 0 <= y_coordinate <= 1000
+                    ):
+                        raise ValueError(
+                            f"Shot id={shot_id} coordinates must be integers from 0 to 1000."
+                        )
 
                     cursor.execute(
                         """
                         INSERT INTO shots (
                             id, game_id, category, type, play, zone,
+                            x_coordinate, y_coordinate,
                             result, recorded_at, data
                         )
-                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                         """,
                         (
                             str(shot_id),
@@ -162,6 +188,8 @@ def save_game_upload(game, play_stats, shots=None):
                             shot.get("type", ""),
                             shot.get("play", ""),
                             shot.get("zone", ""),
+                            x_coordinate,
+                            y_coordinate,
                             shot["result"],
                             shot.get("recordedAt"),
                             Jsonb(shot),

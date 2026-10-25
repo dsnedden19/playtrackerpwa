@@ -27,6 +27,8 @@ Games page to push a game to a local PostgreSQL server.
    ```
 
 The `games`, `play_stats`, and `shots` tables are created automatically on the
-first upload. Each shot row includes its court zone, result, category, type,
-play, and timestamp. Re-uploading a game updates the game and replaces its
-play-stat and shot rows, so the PostgreSQL copy matches the browser payload.
+first upload. Each shot row includes its court zone and 0–1000 x/y court
+coordinates, result, category, type, play, and timestamp. Coordinate origin is
+the lower-left corner, with Y increasing upward. Re-uploading a game updates
+the game and replaces its play-stat and shot rows, so the PostgreSQL copy
+matches the browser payload.

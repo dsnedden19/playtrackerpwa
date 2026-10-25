@@ -233,8 +233,11 @@ async function loadGamePlayStats(gameId) {
 
 async function recordShotAttempt(gameId, shotData) {
     if (!gameId || !shotData?.category || !shotData?.type ||
-        !shotData?.play || !shotData?.zone || !["made", "missed"].includes(shotData.result)) {
-        throw new Error("Game, category, type, play, shot zone, and result are required.");
+        !shotData?.play || !["made", "missed"].includes(shotData.result) ||
+        !Number.isInteger(shotData.x) || !Number.isInteger(shotData.y) ||
+        shotData.x < 0 || shotData.x > 1000 ||
+        shotData.y < 0 || shotData.y > 1000) {
+        throw new Error("Game, category, type, play, valid court coordinates, and result are required.");
     }
 
     const db = await openDB();
