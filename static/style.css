@@ -281,6 +281,26 @@ h1, h2, h3 {
     color: #111;
 }
 
+.inline-stat.offense-stat-green {
+    color: #f5fff8;
+    background: linear-gradient(135deg, #176b3b, #21834b);
+}
+
+.inline-stat.offense-stat-red {
+    color: #fff7f7;
+    background: linear-gradient(135deg, #8f2d35, #aa3942);
+}
+
+.inline-stat.offense-stat-orange {
+    color: #fffaf2;
+    background: linear-gradient(135deg, #99511d, #b56825);
+}
+
+.inline-stat.offense-stat-blue {
+    color: #f5f9ff;
+    background: linear-gradient(135deg, #24539a, #3068b6);
+}
+
 .inline-stat-control {
     width: 20px;
     height: 38px;

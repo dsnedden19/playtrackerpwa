@@ -293,6 +293,24 @@
         });
     }
 
+    const offenseStatColors = {
+        "LUM": "offense-stat-green",
+        "UnCon LUM": "offense-stat-green",
+        "MidM": "offense-stat-green",
+        "3ptM": "offense-stat-green",
+        "FTM": "offense-stat-green",
+        "LUA": "offense-stat-red",
+        "UnCon LUA": "offense-stat-red",
+        "MidA": "offense-stat-red",
+        "3ptA": "offense-stat-red",
+        "FTA": "offense-stat-red",
+        "O Foul": "offense-stat-red",
+        "Turnover": "offense-stat-red",
+        "O Reb": "offense-stat-orange",
+        "2nd Chance": "offense-stat-orange",
+        "Ran": "offense-stat-blue"
+    };
+
     let statsRenderVersion = 0;
 
     async function renderStats(renderVersion) {
@@ -312,7 +330,10 @@
 
         counters.forEach((counter, index) => {
             const card = document.createElement("div");
-            card.className = `inline-stat stat-${(index % 5) + 1}`;
+            const statColor = selectedCategory === "Offense"
+                ? offenseStatColors[counter] || `stat-${(index % 5) + 1}`
+                : `stat-${(index % 5) + 1}`;
+            card.className = `inline-stat ${statColor}`;
 
             const minusButton = document.createElement("button");
             minusButton.type = "button";
