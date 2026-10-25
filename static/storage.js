@@ -10,57 +10,58 @@ function openDB() {
 
     return new Promise((resolve, reject) => {
         const request = indexedDB.open(DB_NAME, DB_VERSION);
-request.onupgradeneeded = (event) => {
-    const db = event.target.result;
-    const upgradeTransaction = event.target.transaction;
 
-    if (!db.objectStoreNames.contains(STORE_NAME)) {
-        const store = db.createObjectStore(STORE_NAME, { keyPath: "id" });
-        store.createIndex("synced", "synced", { unique: false });
-    }
+        request.onupgradeneeded = (event) => {
+            const db = event.target.result;
+            const upgradeTransaction = event.target.transaction;
 
-    let playStatsStore;
+            if (!db.objectStoreNames.contains(STORE_NAME)) {
+                const store = db.createObjectStore(STORE_NAME, { keyPath: "id" });
+                store.createIndex("synced", "synced", { unique: false });
+            }
 
-    if (!db.objectStoreNames.contains(PLAY_STATS_STORE_NAME)) {
-        playStatsStore = db.createObjectStore(
-            PLAY_STATS_STORE_NAME,
-            { keyPath: "id" }
-        );
-    } else {
-        playStatsStore = upgradeTransaction.objectStore(
-            PLAY_STATS_STORE_NAME
-        );
-    }
+            let playStatsStore;
 
-    if (!playStatsStore.indexNames.contains("gameId")) {
-        playStatsStore.createIndex(
-            "gameId",
-            "gameId",
-            { unique: false }
-        );
-    }
+            if (!db.objectStoreNames.contains(PLAY_STATS_STORE_NAME)) {
+                playStatsStore = db.createObjectStore(
+                    PLAY_STATS_STORE_NAME,
+                    { keyPath: "id" }
+                );
+            } else {
+                playStatsStore = upgradeTransaction.objectStore(
+                    PLAY_STATS_STORE_NAME
+                );
+            }
 
-    if (!playStatsStore.indexNames.contains("gameCategoryPlay")) {
-        playStatsStore.createIndex(
-            "gameCategoryPlay",
-            ["gameId", "category", "play"],
-            { unique: true }
-        );
-    }
+            if (!playStatsStore.indexNames.contains("gameId")) {
+                playStatsStore.createIndex(
+                    "gameId",
+                    "gameId",
+                    { unique: false }
+                );
+            }
 
-    if (!playStatsStore.indexNames.contains("synced")) {
-        playStatsStore.createIndex(
-            "synced",
-            "synced",
-            { unique: false }
-        );
-    }
-};
+            if (!playStatsStore.indexNames.contains("gameCategoryPlay")) {
+                playStatsStore.createIndex(
+                    "gameCategoryPlay",
+                    ["gameId", "category", "play"],
+                    { unique: true }
+                );
+            }
+
+            if (!playStatsStore.indexNames.contains("synced")) {
+                playStatsStore.createIndex(
+                    "synced",
+                    "synced",
+                    { unique: false }
+                );
+            }
+        };
+
         request.onsuccess = (event) => {
             dbInstance = event.target.result;
             resolve(dbInstance);
         };
-
 
         request.onerror = (event) => {
             reject(event.target.error);
@@ -122,10 +123,16 @@ async function clearGame(id) {
         request.onerror = (event) => reject(event.target.error);
     });
 }
+
 function createPlayStatsId(gameId, category, play) {
     return `${gameId}|${category}|${play}`;
 }
-async function incrementPlayStat(gameId, category, play, counter) {
+
+async function adjustPlayStat(gameId, category, play, counter, delta) {
+    if (!gameId || !category || !play || !counter) {
+        return null;
+    }
+
     const db = await openDB();
     const id = createPlayStatsId(gameId, category, play);
 
@@ -145,8 +152,9 @@ async function incrementPlayStat(gameId, category, play, counter) {
                 updatedAt: Date.now()
             };
 
-            record.counters[counter] =
-                (record.counters[counter] || 0) + 1;
+            const currentValue = Number(record.counters[counter] || 0);
+            const nextValue = currentValue + Number(delta || 0);
+            record.counters[counter] = Math.max(0, nextValue);
 
             record.synced = false;
             record.updatedAt = Date.now();
@@ -160,6 +168,15 @@ async function incrementPlayStat(gameId, category, play, counter) {
         request.onerror = event => reject(event.target.error);
     });
 }
+
+async function incrementPlayStat(gameId, category, play, counter) {
+    return adjustPlayStat(gameId, category, play, counter, 1);
+}
+
+async function decrementPlayStat(gameId, category, play, counter) {
+    return adjustPlayStat(gameId, category, play, counter, -1);
+}
+
 async function loadPlayStats(gameId, category, play) {
     const db = await openDB();
     const id = createPlayStatsId(gameId, category, play);
@@ -178,6 +195,7 @@ async function loadPlayStats(gameId, category, play) {
         };
     });
 }
+
 async function loadGamePlayStats(gameId) {
     const db = await openDB();
 
@@ -191,6 +209,7 @@ async function loadGamePlayStats(gameId) {
         request.onerror = event => reject(event.target.error);
     });
 }
+
 async function buildGameUploadPayload(gameId) {
     const game = await loadGame(gameId);
 
