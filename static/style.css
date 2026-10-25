@@ -193,7 +193,7 @@ h1, h2, h3 {
         minmax(420px, 3fr);
     justify-content: start;
     column-gap: 10px;
-    row-gap: 2px;
+    row-gap: 0;
     align-items: start;
     text-align: left;
     margin-top: 16px;
@@ -324,42 +324,42 @@ h1, h2, h3 {
     box-sizing: border-box;
     width: 100%;
     justify-self: center;
+    align-self: start;
+    margin: 0;
     padding: 0;
     border: 0;
     background: transparent;
     text-align: left;
 }
 
-.shot-tracker-heading {
-    display: block;
-    padding-left: 5.574%;
+.shot-chart-content {
+    display: grid;
+    grid-template-columns: 105px minmax(0, 305px) 70px;
+    align-items: start;
+    gap: 8px;
+    width: min(100%, 496px);
+    margin: 0 auto;
+    box-sizing: border-box;
 }
 
-.shot-tracker-heading h3 {
-    margin: 0;
+.shot-chart-copy {
+    text-align: left;
 }
 
-.shot-tracker-heading p {
-    margin: 0;
+.shot-chart-copy h3 {
+    margin: 0 0 2px;
+}
+
+.shot-chart-copy p {
+    margin: 0 0 4px;
     color: #d0d0d0;
     font-size: .72rem;
-    text-align: left;
-}
-
-#shot-status {
-    text-align: left;
-}
-
-.shot-chart-content {
-    width: min(100%, 305px);
-    margin: 0 auto;
-    padding-top: 21px;
-    box-sizing: border-box;
 }
 
 .shot-court {
     display: block;
-    width: min(100%, 305px);
+    width: 100%;
+    min-width: 0;
     height: auto;
 }
 
@@ -406,18 +406,9 @@ h1, h2, h3 {
     stroke-width: 2;
 }
 
-.shot-chart-row {
-    display: flex;
-    align-items: flex-start;
-    justify-content: flex-start;
-    gap: 8px;
-    width: 100%;
-}
-
 #selected-shot-location {
     min-height: 0;
-    margin: 0 0 2px;
-    padding-left: 5.574%;
+    margin: 0;
     color: #fff;
     font-size: .72rem;
     font-weight: 600;
@@ -425,9 +416,8 @@ h1, h2, h3 {
 
 .shot-result-buttons {
     display: grid;
-    flex: 0 0 70px;
+    width: 70px;
     gap: 6px;
-    padding-top: 21px;
 }
 
 .shot-result {
@@ -512,7 +502,8 @@ a {
     .selector-board {
         grid-template-columns: minmax(110px, .8fr) minmax(175px, 1.35fr)
             minmax(400px, 3fr);
-        gap: 7px;
+        column-gap: 7px;
+        row-gap: 0;
     }
 
     .selector-left-stack {
@@ -544,14 +535,6 @@ a {
 
     .play-options {
         grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-
-    #shot-status {
-        text-align: left;
-    }
-
-    .shot-tracker-heading p {
-        text-align: left;
     }
 
 }
