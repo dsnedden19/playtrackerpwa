@@ -192,7 +192,8 @@ h1, h2, h3 {
     grid-template-columns: minmax(125px, .8fr) minmax(210px, 1.35fr)
         minmax(420px, 3fr);
     justify-content: start;
-    gap: 10px;
+    column-gap: 10px;
+    row-gap: 2px;
     align-items: start;
     text-align: left;
     margin-top: 16px;
@@ -330,10 +331,7 @@ h1, h2, h3 {
 }
 
 .shot-tracker-heading {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
+    display: block;
 }
 
 .shot-tracker-heading h3 {
@@ -341,14 +339,19 @@ h1, h2, h3 {
 }
 
 .shot-tracker-heading p {
-    margin: 0;
+    margin: 0 0 2px;
     color: #d0d0d0;
     font-size: .72rem;
-    text-align: right;
+    text-align: left;
 }
 
 #shot-status {
-    text-align: right;
+    text-align: left;
+}
+
+.shot-chart-content {
+    width: min(100%, 305px);
+    margin: 0 auto;
 }
 
 .shot-court {
@@ -403,13 +406,13 @@ h1, h2, h3 {
 .shot-chart-row {
     display: flex;
     align-items: flex-start;
-    justify-content: center;
+    justify-content: flex-start;
     gap: 8px;
     width: 100%;
 }
 
 #selected-shot-location {
-    margin: 1px 0 0;
+    margin: 0 0 2px;
     color: #fff;
     font-size: .72rem;
     font-weight: 600;
@@ -447,7 +450,7 @@ h1, h2, h3 {
 }
 
 .shot-coordinate-help {
-    margin: 1px 0 0;
+    margin: 0;
     color: #aaa;
     font-size: .62rem;
 }
@@ -546,11 +549,6 @@ a {
 
     #shot-status {
         text-align: left;
-    }
-
-    .shot-tracker-heading {
-        align-items: flex-start;
-        flex-direction: column;
     }
 
     .shot-tracker-heading p {
