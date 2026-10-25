@@ -1,5 +1,5 @@
 const DB_NAME = "playtracker_.db";
-const DB_VERSION = 5;
+const DB_VERSION = 6;
 const STORE_NAME = "games";
 const PLAY_STATS_STORE_NAME = "play_stats";
 
