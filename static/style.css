@@ -321,8 +321,11 @@ h1, h2, h3 {
 .shot-tracker {
     grid-column: 3;
     box-sizing: border-box;
-    width: min(100%, 440px);
-    justify-self: start;
+    width: 100%;
+    justify-self: center;
+    padding: 0;
+    border: 0;
+    background: transparent;
     text-align: left;
 }
 
@@ -350,24 +353,8 @@ h1, h2, h3 {
 
 .shot-court {
     display: block;
-    width: min(100%, 260px);
+    width: min(100%, 305px);
     height: auto;
-    margin: 0 auto;
-    border-radius: 10px;
-    background: #202020;
-}
-
-.court-floor {
-    fill: #9d704c;
-    stroke: #f1d5b7;
-    stroke-width: 3;
-}
-
-.court-markings {
-    fill: none;
-    stroke: rgba(255, 255, 255, .85);
-    stroke-width: 2;
-    pointer-events: none;
 }
 
 .court-tap-area {
@@ -380,18 +367,6 @@ h1, h2, h3 {
     outline: none;
     stroke: #ff7a00;
     stroke-width: 3;
-}
-
-.court-axis-label {
-    fill: #ddd;
-    font-size: 12px;
-}
-
-.court-end-label,
-.court-origin-label {
-    fill: rgba(255, 255, 255, .78);
-    font-size: 9px;
-    pointer-events: none;
 }
 
 .shot-marker-dot {
@@ -416,16 +391,16 @@ h1, h2, h3 {
     stroke-width: 2;
 }
 
-.shot-result-panel {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    align-items: center;
-    gap: 4px 8px;
-    padding-top: 6px;
+.shot-chart-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
 }
 
 #selected-shot-location {
-    margin: 0;
+    margin: 5px 0 0;
     color: #fff;
     font-size: .72rem;
     font-weight: 600;
@@ -433,17 +408,18 @@ h1, h2, h3 {
 
 .shot-result-buttons {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 5px;
+    flex: 0 0 70px;
+    gap: 6px;
+    padding-top: 21px;
 }
 
 .shot-result {
-    min-height: 34px;
+    min-height: 42px;
     border: 0;
     border-radius: 7px;
     color: #fff;
     font: inherit;
-    font-size: .8rem;
+    font-size: .78rem;
     font-weight: 700;
     touch-action: manipulation;
 }
@@ -462,7 +438,6 @@ h1, h2, h3 {
 }
 
 .shot-coordinate-help {
-    grid-column: 1 / -1;
     margin: 0;
     color: #aaa;
     font-size: .62rem;
@@ -571,13 +546,6 @@ a {
 
     .shot-tracker-heading p {
         text-align: left;
-    }
-
-    .shot-result-panel {
-        display: grid;
-        grid-template-columns: 1fr auto;
-        align-items: center;
-        gap: 8px;
     }
 
 }

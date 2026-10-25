@@ -31,41 +31,30 @@
             <h3>Stats</h3>
             <div id="stat-options" class="stat-options"></div>
         </section>
-        <section class="shot-tracker selector-panel" aria-labelledby="shot-tracker-title">
-        <div class="shot-tracker-heading">
-            <h3 id="shot-tracker-title">Shot Chart</h3>
-            <p id="shot-status" role="status" aria-live="polite">Tap the court to place a shot.</p>
-        </div>
-        <svg id="shot-court" class="shot-court" viewBox="0 0 400 500"
-             role="application" aria-labelledby="court-title court-description">
-            <title id="court-title">Half-court shot chart</title>
-            <desc id="court-description">Tap the half court to mark a shot location. The baseline is at the top and half court at the bottom. The lower-left court corner is coordinate zero, zero.</desc>
-            <rect class="court-floor" x="20" y="15" width="360" height="470"></rect>
-            <g class="court-markings" aria-hidden="true">
-                <text class="court-end-label" x="200" y="478" text-anchor="middle">HALF COURT</text>
-                <rect x="130" y="15" width="140" height="190"></rect>
-                <path d="M130 205 A70 70 0 0 0 270 205"></path>
-                <path d="M75 15 Q200 265 325 15"></path>
-                <circle cx="200" cy="63" r="13"></circle>
-                <line x1="172" y1="48" x2="228" y2="48"></line>
-            </g>
-            <g id="shot-markers" aria-hidden="true"></g>
-            <g id="pending-shot-marker" aria-hidden="true"></g>
-            <rect class="court-tap-area" x="20" y="15" width="360" height="470"
-                  role="button" tabindex="0" aria-label="Tap to place a shot on the court"></rect>
-            <text class="court-axis-label" x="200" y="498" text-anchor="middle">X axis</text>
-            <text class="court-axis-label" x="9" y="250" text-anchor="middle"
-                  transform="rotate(-90 9 250)">Y axis</text>
-            <text class="court-origin-label" x="22" y="478">0,0</text>
-        </svg>
-        <div class="shot-result-panel">
-            <p id="selected-shot-location">Tap the court to choose a location.</p>
-            <div class="shot-result-buttons">
-                <button type="button" id="shot-made" class="shot-result made" disabled>Made</button>
-                <button type="button" id="shot-missed" class="shot-result missed" disabled>Missed</button>
+        <section class="shot-tracker" aria-labelledby="shot-tracker-title">
+            <div class="shot-tracker-heading">
+                <h3 id="shot-tracker-title">Shot Chart</h3>
+                <p id="shot-status" role="status" aria-live="polite">Tap the court to place a shot.</p>
             </div>
-            <p class="shot-coordinate-help">0–1000 grid; origin is lower-left, Y increases upward.</p>
-        </div>
+            <div class="shot-chart-row">
+                <svg id="shot-court" class="shot-court" viewBox="0 0 305 275"
+                     role="application" aria-labelledby="court-title court-description">
+                    <title id="court-title">Half-court shot chart</title>
+                    <desc id="court-description">Tap the supplied half-court image to place a shot. The baseline is at the top, half court at the bottom, and the lower-left corner is coordinate zero, zero.</desc>
+                    <image href="/static/court-half.png" x="0" y="0" width="305" height="275"
+                           preserveAspectRatio="none"></image>
+                    <g id="shot-markers" aria-hidden="true"></g>
+                    <g id="pending-shot-marker" aria-hidden="true"></g>
+                    <rect class="court-tap-area" x="17" y="21" width="264" height="231"
+                          role="button" tabindex="0" aria-label="Tap to place a shot on the court"></rect>
+                </svg>
+                <div class="shot-result-buttons">
+                    <button type="button" id="shot-made" class="shot-result made" disabled>Made</button>
+                    <button type="button" id="shot-missed" class="shot-result missed" disabled>Miss</button>
+                </div>
+            </div>
+            <p id="selected-shot-location">Tap the court to choose a location.</p>
+            <p class="shot-coordinate-help">0–1000 grid from the lower-left corner.</p>
         </section>
     </main>
 </div>
@@ -94,7 +83,7 @@
     const courtTapArea = shotCourt.querySelector(".court-tap-area");
     const shotMarkers = document.getElementById("shot-markers");
     const pendingShotMarker = document.getElementById("pending-shot-marker");
-    const COURT_BOUNDS = { left: 20, top: 15, right: 380, bottom: 485 };
+    const COURT_BOUNDS = { left: 17, top: 21, right: 281, bottom: 252 };
 
     function clearShotLocation() {
         selectedShotLocation = null;
