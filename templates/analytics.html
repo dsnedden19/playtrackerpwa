@@ -100,6 +100,38 @@
                     <div id="stat-chart" class="stat-chart"></div>
                 </section>
 
+                <section class="analytics-panel play-share-panel">
+                    <div class="analytics-panel-heading">
+                        <div>
+                            <h2>Offensive Ran by play</h2>
+                            <p>Each slice is that play’s share of all offensive Ran counts.</p>
+                        </div>
+                    </div>
+                    <div class="play-pie-layout">
+                        <div id="ran-play-pie" class="play-pie" role="img"></div>
+                        <div id="ran-play-legend" class="play-pie-legend"></div>
+                    </div>
+                    <p id="ran-play-empty" class="play-pie-empty" hidden>
+                        No offensive Ran counts for this game selection.
+                    </p>
+                </section>
+
+                <section class="analytics-panel play-share-panel">
+                    <div class="analytics-panel-heading">
+                        <div>
+                            <h2>Offensive points by play</h2>
+                            <p>Share of points calculated from offensive scoring stats only.</p>
+                        </div>
+                    </div>
+                    <div class="play-pie-layout">
+                        <div id="points-play-pie" class="play-pie" role="img"></div>
+                        <div id="points-play-legend" class="play-pie-legend"></div>
+                    </div>
+                    <p id="points-play-empty" class="play-pie-empty" hidden>
+                        No calculated offensive points for this game selection.
+                    </p>
+                </section>
+
                 <section class="analytics-panel play-analysis-panel">
                     <div class="analytics-panel-heading">
                         <div>
@@ -132,6 +164,21 @@
         const content = document.getElementById("analytics-content");
         const markerLayer = document.getElementById("analytics-shot-markers");
         const COURT = { left: 17, top: 21, right: 281, bottom: 252 };
+        const PLAY_PIE_COLORS = [
+            "#4b8be8", "#37a66b", "#e16a5d", "#e4a33e", "#a35bd1",
+            "#32a9b5", "#d75d97", "#8b9b42", "#d77a35", "#6b75ce",
+            "#43a38a", "#ba6b4d"
+        ];
+        const OFFENSIVE_CATEGORIES = new Set([
+            "man offense", "zone offense", "blob", "slob"
+        ]);
+        const POINTS_COUNTERS = [
+            ["3ptM", 3],
+            ["UnCon LUM", 2],
+            ["LUM", 2],
+            ["MidM", 2],
+            ["FTM", 1]
+        ];
         let analyticsGames = [];
 
         function makeShotMarker(shot) {
@@ -191,6 +238,102 @@
             });
         }
 
+        function renderPlayPie(values, pieId, legendId, emptyId, emptyMessage) {
+            const entries = [...values.entries()]
+                .filter(([, value]) => value > 0)
+                .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+            const total = entries.reduce((sum, [, value]) => sum + value, 0);
+            const pie = document.getElementById(pieId);
+            const legend = document.getElementById(legendId);
+            const emptyMessageElement = document.getElementById(emptyId);
+            legend.replaceChildren();
+            pie.hidden = total === 0;
+            emptyMessageElement.hidden = total !== 0;
+            if (!total) {
+                emptyMessageElement.textContent = emptyMessage;
+                return;
+            }
+
+            let start = 0;
+            const slices = entries.map(([play, value], index) => {
+                const end = start + (value / total) * 100;
+                const color = PLAY_PIE_COLORS[index % PLAY_PIE_COLORS.length];
+                const slice = `${color} ${start}% ${end}%`;
+                start = end;
+
+                const item = document.createElement("div");
+                item.className = "play-pie-legend-item";
+                const swatch = document.createElement("span");
+                swatch.className = "play-pie-swatch";
+                swatch.style.backgroundColor = color;
+                swatch.setAttribute("aria-hidden", "true");
+                const label = document.createElement("span");
+                label.className = "play-pie-legend-label";
+                label.textContent = play;
+                const share = document.createElement("strong");
+                share.textContent =
+                    `${value} · ${((value / total) * 100).toFixed(1)}%`;
+                item.append(swatch, label, share);
+                legend.appendChild(item);
+                return slice;
+            });
+
+            pie.style.background = `conic-gradient(${slices.join(", ")})`;
+            pie.setAttribute(
+                "aria-label",
+                entries.map(([play, value]) =>
+                    `${play}: ${((value / total) * 100).toFixed(1)} percent`
+                ).join("; ")
+            );
+        }
+
+        function renderOffensivePlayAnalysis(games) {
+            const ranByPlay = new Map();
+            const pointsByPlay = new Map();
+
+            games.forEach(({ playStats }) => {
+                playStats.forEach(record => {
+                    const category = String(record.category || "").trim().toLowerCase();
+                    if (!OFFENSIVE_CATEGORIES.has(category)) {
+                        return;
+                    }
+                    const play = String(record.play || "Unnamed play");
+                    const counters = record.counters || {};
+                    const ran = Number(counters.Ran) || 0;
+                    if (ran > 0) {
+                        ranByPlay.set(play, (ranByPlay.get(play) || 0) + ran);
+                    }
+
+                    const points = POINTS_COUNTERS.reduce(
+                        (sum, [counter, value]) =>
+                            sum + (Number(counters[counter]) || 0) * value,
+                        0
+                    );
+                    if (points > 0) {
+                        pointsByPlay.set(
+                            play,
+                            (pointsByPlay.get(play) || 0) + points
+                        );
+                    }
+                });
+            });
+
+            renderPlayPie(
+                ranByPlay,
+                "ran-play-pie",
+                "ran-play-legend",
+                "ran-play-empty",
+                "No offensive Ran counts for this game selection."
+            );
+            renderPlayPie(
+                pointsByPlay,
+                "points-play-pie",
+                "points-play-legend",
+                "points-play-empty",
+                "No calculated offensive points for this game selection."
+            );
+        }
+
         function renderStatAnalysis(games) {
             const categoryFilter = categorySelect.value;
             const totals = new Map();
@@ -202,7 +345,7 @@
                     if (
                         categoryFilter !== "all" &&
                         record.category !== categoryFilter &&
-                        !record.category.toLowerCase().includes(categoryFilter.toLowerCase())
+                        !String(record.category || "").toLowerCase().includes(categoryFilter.toLowerCase())
                     ) {
                         return;
                     }
@@ -285,6 +428,7 @@
             const games = selectedGames();
             renderShotAnalysis(games);
             renderStatAnalysis(games);
+            renderOffensivePlayAnalysis(games);
             statusMessage.textContent = games.length
                 ? `Showing analytics for ${games.length} ${games.length === 1 ? "game" : "games"}.`
                 : "No saved games match this selection.";
