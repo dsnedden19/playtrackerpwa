@@ -7,12 +7,18 @@
         <div class="button-grid">
             {% for c in counters %}
                 {% set color = (loop.index0 % 5) + 1 %}
-                <button class="button stat-{{ color }}"
-                        type="submit"
-                        name="counter"
-                        value="{{ c }}">
-                    {{ c }} ({{ values[c] }})
-                </button>
+                <div class="stat-card stat-{{ color }}" data-counter="{{ c }}">
+                    <div class="stat-card-header">{{ c }}</div>
+                    <div class="stat-total" data-counter-total="{{ c }}">{{ values[c] or 0 }}</div>
+                    <div class="stat-split">
+                        <button class="stat-half stat-half-left" type="button" data-counter="{{ c }}" data-delta="-1" aria-label="Subtract 1 from {{ c }}">
+                            −1
+                        </button>
+                        <button class="stat-half stat-half-right" type="button" data-counter="{{ c }}" data-delta="1" aria-label="Add 1 to {{ c }}">
+                            +1
+                        </button>
+                    </div>
+                </div>
             {% endfor %}
 
             <a href="/category" class="button" style="background-color: gray;">
@@ -22,54 +28,55 @@
             <a href="/summary" class="button" style="background-color: black;">
                 View Summary
             </a>
-<script src="/static/storage.js"></script>
-<script>
-    document.getElementById("stat-form").addEventListener("submit", async function (event) {
-        event.preventDefault();
-
-        const gameId = localStorage.getItem("activeGameId");
-        const category = event.currentTarget.dataset.category;
-        const play = event.currentTarget.dataset.play;
-        const counter = event.submitter.value;
-
-        const record = await incrementPlayStat(
-            gameId,
-            category,
-            play,
-            counter
-        );
-
-        event.submitter.textContent =
-            counter + " (" + record.counters[counter] + ")";
-    });
-</script>
         </div>
     </form>
-<script>
-    window.addEventListener("DOMContentLoaded", async function () {
-        const form = document.getElementById("stat-form");
-        const gameId = localStorage.getItem("activeGameId");
 
-        if (!form || !gameId) {
-            return;
+    <script src="/static/storage.js"></script>
+    <script>
+        function updateCounterCard(card, value) {
+            const totalEl = card.querySelector(".stat-total");
+            if (totalEl) {
+                totalEl.textContent = value;
+            }
         }
 
-        const category = form.dataset.category;
-        const play = form.dataset.play;
-        const record = await loadPlayStats(gameId, category, play);
+        window.addEventListener("DOMContentLoaded", async function () {
+            const form = document.getElementById("stat-form");
+            const gameId = localStorage.getItem("activeGameId");
 
-        if (!record) {
-            return;
-        }
+            if (!form || !gameId) {
+                return;
+            }
 
-        const buttons = form.querySelectorAll('button[name="counter"]');
+            const category = form.dataset.category;
+            const play = form.dataset.play;
+            const record = await loadPlayStats(gameId, category, play);
 
-        buttons.forEach(button => {
-            const counter = button.value;
-            const total = record.counters[counter] || 0;
-            button.textContent = counter + " (" + total + ")";
+            const cards = form.querySelectorAll(".stat-card");
+            cards.forEach(card => {
+                const counter = card.dataset.counter;
+                const value = record && record.counters ? (record.counters[counter] || 0) : 0;
+                updateCounterCard(card, value);
+            });
+
+            form.querySelectorAll(".stat-half").forEach(button => {
+                button.addEventListener("click", async function () {
+                    const counter = this.dataset.counter;
+                    const delta = Number(this.dataset.delta);
+                    const record = await adjustPlayStat(
+                        gameId,
+                        category,
+                        play,
+                        counter,
+                        delta
+                    );
+
+                    const card = this.closest(".stat-card");
+                    if (card) {
+                        updateCounterCard(card, record.counters[counter] || 0);
+                    }
+                });
+            });
         });
-    });
-</script>
+    </script>
 </div>
-
