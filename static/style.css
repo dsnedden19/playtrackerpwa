@@ -189,12 +189,18 @@ h1, h2, h3 {
 
 .selector-board {
     display: grid;
-    grid-template-columns: minmax(76px, .75fr) minmax(84px, .85fr)
-        minmax(160px, 1.8fr) minmax(300px, 3.2fr);
+    grid-template-columns: minmax(125px, .8fr) minmax(260px, 1.8fr)
+        minmax(360px, 2.7fr);
+    justify-content: start;
     gap: 10px;
     align-items: start;
     text-align: left;
     margin-top: 16px;
+}
+
+.selector-left-stack {
+    display: grid;
+    gap: 10px;
 }
 
 .selector-panel {
@@ -262,13 +268,13 @@ h1, h2, h3 {
 
 .stat-options {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 6px;
 }
 
 .inline-stat {
     display: grid;
-    grid-template-columns: 32px minmax(0, 1fr) 30px 32px;
+    grid-template-columns: 24px minmax(0, 1fr) 24px 24px;
     align-items: center;
     min-width: 0;
     min-height: 38px;
@@ -282,13 +288,13 @@ h1, h2, h3 {
 }
 
 .inline-stat-control {
-    width: 32px;
+    width: 24px;
     height: 38px;
     padding: 0;
     border: 0;
     background: rgba(0, 0, 0, .16);
     color: inherit;
-    font-size: 1.25rem;
+    font-size: 1.05rem;
     font-weight: 700;
     touch-action: manipulation;
 }
@@ -299,16 +305,16 @@ h1, h2, h3 {
 
 .inline-stat-label {
     min-width: 0;
-    padding-left: 5px;
+    padding-left: 3px;
     overflow: hidden;
-    font-size: .76rem;
+    font-size: .68rem;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
 .inline-stat-value {
     text-align: center;
-    font-size: .82rem;
+    font-size: .76rem;
     font-weight: 700;
 }
 
@@ -368,8 +374,12 @@ a {
     }
 
     .selector-board {
-        grid-template-columns: minmax(64px, .7fr) minmax(72px, .8fr)
-            minmax(140px, 1.7fr) minmax(280px, 3.2fr);
+        grid-template-columns: minmax(110px, .8fr) minmax(230px, 1.8fr)
+            minmax(330px, 2.7fr);
+        gap: 7px;
+    }
+
+    .selector-left-stack {
         gap: 7px;
     }
 
@@ -377,17 +387,13 @@ a {
         padding: 7px;
     }
 
-    .inline-stat {
-        grid-template-columns: 28px minmax(0, 1fr) 26px 28px;
-    }
-
     .inline-stat-control {
-        width: 28px;
+        width: 24px;
     }
 
     .inline-stat-label {
-        padding-left: 3px;
-        font-size: .7rem;
+        padding-left: 2px;
+        font-size: .64rem;
     }
 }
 
