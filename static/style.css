@@ -647,25 +647,35 @@ h1, h2, h3 {
     background: #aa3942;
 }
 
-.stat-chart {
+.stat-summary-grid {
     display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
     gap: 10px;
 }
 
-.stat-chart-row {
-    grid-template-columns: minmax(70px, 115px) minmax(0, 1fr) 36px;
+.stat-summary-card {
+    display: grid;
+    min-height: 90px;
+    align-content: center;
+    justify-items: center;
+    gap: 8px;
+    padding: 12px 8px;
+    border: 1px solid #353535;
+    border-radius: 9px;
+    background: #242424;
+    text-align: center;
 }
 
-.stat-chart-label {
-    overflow: hidden;
-    color: #e5e5e5;
-    font-size: .82rem;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+.stat-summary-card span {
+    color: #bdbdbd;
+    font-size: .86rem;
+    font-weight: 700;
 }
 
-.stat-total-bar {
-    background: linear-gradient(90deg, #24539a, #397bcb);
+.stat-summary-card strong {
+    color: #ff8a24;
+    font-size: 1.45rem;
+    font-variant-numeric: tabular-nums;
 }
 
 .play-pie-layout {

@@ -98,10 +98,10 @@
                     <div class="analytics-panel-heading">
                         <div>
                             <h2>Stat totals</h2>
-                            <p>Totals for the selected game and category.</p>
+                            <p>Shooting percentages and counts for the selected filters.</p>
                         </div>
                     </div>
-                    <div id="stat-chart" class="stat-chart"></div>
+                    <div id="stat-chart" class="stat-summary-grid"></div>
                 </section>
 
                 <section class="analytics-panel play-share-panel">
@@ -184,6 +184,17 @@
             ["MidM", 2],
             ["FTM", 1]
         ];
+        const SHOOTING_PERCENTAGES = [
+            {
+                label: "Lay up %",
+                made: ["LUM", "UnCon LUM"],
+                attempts: ["LUA", "UnCon LUA"]
+            },
+            { label: "Mid %", made: ["MidM"], attempts: ["MidA"] },
+            { label: "3pt %", made: ["3ptM"], attempts: ["3ptA"] },
+            { label: "FT %", made: ["FTM"], attempts: ["FTA"] }
+        ];
+        const STAT_COUNTS = ["O Reb", "2nd Chance", "Turnover"];
         let analyticsGames = [];
 
         function makeShotMarker(shot) {
@@ -396,32 +407,36 @@
             document.getElementById("stat-record-total").textContent = recordCount;
             const statChart = document.getElementById("stat-chart");
             statChart.replaceChildren();
-            const sortedTotals = [...totals.entries()]
-                .filter(([, value]) => value > 0)
-                .sort((a, b) => b[1] - a[1]);
-
-            if (!sortedTotals.length) {
-                statChart.textContent = "No tracked stats for this selection yet.";
-            } else {
-                const maxValue = sortedTotals[0][1];
-                sortedTotals.forEach(([counter, value]) => {
-                    const row = document.createElement("div");
-                    row.className = "stat-chart-row";
-                    const label = document.createElement("span");
-                    label.className = "stat-chart-label";
-                    label.textContent = counter;
-                    const track = document.createElement("div");
-                    track.className = "analytics-track";
-                    const bar = document.createElement("span");
-                    bar.className = "analytics-bar stat-total-bar";
-                    bar.style.width = `${(value / maxValue) * 100}%`;
-                    track.appendChild(bar);
-                    const total = document.createElement("strong");
-                    total.textContent = value;
-                    row.append(label, track, total);
-                    statChart.appendChild(row);
-                });
-            }
+            const summaryCards = [
+                ...SHOOTING_PERCENTAGES.map(({ label, made, attempts }) => {
+                    const madeTotal = made.reduce(
+                        (sum, counter) => sum + (totals.get(counter) || 0),
+                        0
+                    );
+                    const attemptTotal = attempts.reduce(
+                        (sum, counter) => sum + (totals.get(counter) || 0),
+                        0
+                    );
+                    return {
+                        label,
+                        value: `${(attemptTotal ? (madeTotal / attemptTotal) * 100 : 0).toFixed(2)}%`
+                    };
+                }),
+                ...STAT_COUNTS.map(counter => ({
+                    label: counter === "Turnover" ? "Turnovers" : counter,
+                    value: totals.get(counter) || 0
+                }))
+            ];
+            summaryCards.forEach(({ label, value }) => {
+                const card = document.createElement("article");
+                card.className = "stat-summary-card";
+                const title = document.createElement("span");
+                title.textContent = label;
+                const result = document.createElement("strong");
+                result.textContent = value;
+                card.append(title, result);
+                statChart.appendChild(card);
+            });
 
             const rows = document.getElementById("play-stat-rows");
             rows.replaceChildren();
