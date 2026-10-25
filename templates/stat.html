@@ -3,85 +3,34 @@
 <div class="container">
     <h2>{{ play }} ({{ category }})</h2>
 
-    <form id="stat-form" data-category="{{ category }}" data-play="{{ play }}">
-        <div class="button-grid">
-            {% for c in counters %}
-                {% set color = (loop.index0 % 5) + 1 %}
-                <div class="stat-card stat-{{ color }}" data-counter="{{ c }}">
-                    <div class="stat-card-header">{{ c }}</div>
-                    <div class="stat-total" data-counter-total="{{ c }}">
-                        {{ values[c] if values and c in values else 0 }}
-                    </div>
+    <div class="button-grid">
+        {% for c in counters %}
+            {% set color = (loop.index0 % 5) + 1 %}
+            <div class="stat-card stat-{{ color }}">
+                <div class="stat-card-header">{{ c }}</div>
+                <div class="stat-total">{{ values[c] }}</div>
 
-                    <div class="stat-split">
-                        <button
-                            class="stat-half stat-half-left"
-                            type="button"
-                            data-counter="{{ c }}"
-                            data-delta="-1"
-                            aria-label="Subtract 1 from {{ c }}">
+                <div class="stat-split">
+                    <form method="POST" class="stat-form">
+                        <input type="hidden" name="counter" value="{{ c }}">
+                        <input type="hidden" name="delta" value="-1">
+                        <button type="submit" class="stat-half stat-half-left" aria-label="Subtract 1 from {{ c }}">
                             −1
                         </button>
+                    </form>
 
-                        <button
-                            class="stat-half stat-half-right"
-                            type="button"
-                            data-counter="{{ c }}"
-                            data-delta="1"
-                            aria-label="Add 1 to {{ c }}">
+                    <form method="POST" class="stat-form">
+                        <input type="hidden" name="counter" value="{{ c }}">
+                        <input type="hidden" name="delta" value="1">
+                        <button type="submit" class="stat-half stat-half-right" aria-label="Add 1 to {{ c }}">
                             +1
                         </button>
-                    </div>
+                    </form>
                 </div>
-            {% endfor %}
+            </div>
+        {% endfor %}
 
-            <a href="/category" class="button secondary-btn">Back to Categories</a>
-            <a href="/summary" class="button dark-btn">View Summary</a>
-        </div>
-    </form>
-
-    <script src="/static/storage.js"></script>
-    <script>
-        function updateDisplay(card, value) {
-            const totalEl = card.querySelector(".stat-total");
-            if (totalEl) totalEl.textContent = value;
-        }
-
-        window.addEventListener("DOMContentLoaded", async function () {
-            const form = document.getElementById("stat-form");
-            const gameId = localStorage.getItem("activeGameId");
-
-            if (!form || !gameId) return;
-
-            const category = form.dataset.category;
-            const play = form.dataset.play;
-            const record = await loadPlayStats(gameId, category, play);
-
-            const cards = form.querySelectorAll(".stat-card");
-            cards.forEach(card => {
-                const counter = card.dataset.counter;
-                const value = record && record.counters ? (record.counters[counter] || 0) : 0;
-                updateDisplay(card, value);
-            });
-
-            form.querySelectorAll(".stat-half").forEach(button => {
-                button.addEventListener("click", async function () {
-                    const counter = this.dataset.counter;
-                    const delta = Number(this.dataset.delta);
-                    const nextRecord = await adjustPlayStat(
-                        gameId,
-                        category,
-                        play,
-                        counter,
-                        delta
-                    );
-
-                    const card = this.closest(".stat-card");
-                    if (card && nextRecord && nextRecord.counters) {
-                        updateDisplay(card, nextRecord.counters[counter] || 0);
-                    }
-                });
-            });
-        });
-    </script>
+        <a href="/category" class="button secondary-btn">Back to Categories</a>
+        <a href="/summary" class="button dark-btn">View Summary</a>
+    </div>
 </div>
