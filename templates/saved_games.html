@@ -21,6 +21,11 @@ homeButton.href = "/";
 homeButton.className = "button";
 homeButton.textContent = "Back to Home";
 document.body.appendChild(homeButton);
+const analyticsButton = document.createElement("a");
+analyticsButton.href = "/analytics";
+analyticsButton.className = "button";
+analyticsButton.textContent = "Game Analysis";
+document.body.appendChild(analyticsButton);
 async function displayGames() {
 
     const games = await loadAllGames();

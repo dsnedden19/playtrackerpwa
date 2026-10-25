@@ -186,6 +186,11 @@ def summary():
     return render_template("summary.html", game=None, stats={})
 
 
+@app.route("/analytics")
+def analytics():
+    return render_template("analytics.html")
+
+
 # -------------------------
 # Upload
 # -------------------------

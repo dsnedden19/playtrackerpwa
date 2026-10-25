@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#121212">
+    <title>Game Analysis | Play Tracker</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <main class="container analytics-container">
+        <header class="analytics-header">
+            <div>
+                <h1>Game Analysis</h1>
+                <p>Explore shot locations and tracked stats saved on this device.</p>
+            </div>
+            <nav class="analytics-nav" aria-label="Main navigation">
+                <a href="/category" class="button">Tracker</a>
+                <a href="/saved_games" class="button">Saved Games</a>
+                <a href="/" class="button">Home</a>
+            </nav>
+        </header>
+
+        <section class="analytics-toolbar" aria-label="Analysis filters">
+            <label for="analytics-game">Game</label>
+            <select id="analytics-game">
+                <option value="all">All saved games</option>
+            </select>
+            <label for="analytics-category">Stats</label>
+            <select id="analytics-category">
+                <option value="all">Offense and defense</option>
+                <option value="Offense">Offense</option>
+                <option value="Defense">Defense</option>
+            </select>
+        </section>
+
+        <p id="analytics-status" class="analytics-status" role="status" aria-live="polite">
+            Loading saved game data...
+        </p>
+
+        <section id="analytics-content" hidden>
+            <div class="analytics-kpis">
+                <article class="analytics-kpi">
+                    <span>Shot attempts</span>
+                    <strong id="attempt-total">0</strong>
+                </article>
+                <article class="analytics-kpi">
+                    <span>Made shots</span>
+                    <strong id="made-total">0</strong>
+                </article>
+                <article class="analytics-kpi">
+                    <span>Shot percentage</span>
+                    <strong id="shot-percentage">0%</strong>
+                </article>
+                <article class="analytics-kpi">
+                    <span>Tracked stat records</span>
+                    <strong id="stat-record-total">0</strong>
+                </article>
+            </div>
+
+            <div class="analytics-grid">
+                <section class="analytics-panel shot-analysis-panel">
+                    <div class="analytics-panel-heading">
+                        <div>
+                            <h2>Shot chart</h2>
+                            <p>Green dots are makes; red Xs are misses.</p>
+                        </div>
+                    </div>
+                    <div class="analytics-court-wrap">
+                        <svg id="analytics-court" viewBox="17 21 264 231"
+                             role="img" aria-labelledby="analytics-court-title analytics-court-desc">
+                            <title id="analytics-court-title">Shot locations</title>
+                            <desc id="analytics-court-desc">Recorded shots plotted at their saved court coordinates.</desc>
+                            <image href="/static/court-half.png" x="0" y="0"
+                                   width="305" height="275" preserveAspectRatio="none"></image>
+                            <g id="analytics-shot-markers"></g>
+                        </svg>
+                    </div>
+                    <div class="shot-result-summary">
+                        <div class="shot-result-row">
+                            <span class="made-legend">Made</span>
+                            <div class="analytics-track"><span id="made-bar" class="analytics-bar made-bar"></span></div>
+                            <strong id="made-count">0</strong>
+                        </div>
+                        <div class="shot-result-row">
+                            <span class="missed-legend">Missed</span>
+                            <div class="analytics-track"><span id="missed-bar" class="analytics-bar missed-bar"></span></div>
+                            <strong id="missed-count">0</strong>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="analytics-panel">
+                    <div class="analytics-panel-heading">
+                        <div>
+                            <h2>Stat totals</h2>
+                            <p>Totals for the selected game and category.</p>
+                        </div>
+                    </div>
+                    <div id="stat-chart" class="stat-chart"></div>
+                </section>
+
+                <section class="analytics-panel play-analysis-panel">
+                    <div class="analytics-panel-heading">
+                        <div>
+                            <h2>Stats by play</h2>
+                            <p>Non-zero stat counts grouped by category and play.</p>
+                        </div>
+                    </div>
+                    <div class="analytics-table-wrap">
+                        <table class="analytics-table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Category / Play</th>
+                                    <th scope="col">Recorded stats</th>
+                                    <th scope="col">Total count</th>
+                                </tr>
+                            </thead>
+                            <tbody id="play-stat-rows"></tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+        </section>
+    </main>
+
+    <script src="/static/storage.js"></script>
+    <script>
+        const gameSelect = document.getElementById("analytics-game");
+        const categorySelect = document.getElementById("analytics-category");
+        const statusMessage = document.getElementById("analytics-status");
+        const content = document.getElementById("analytics-content");
+        const markerLayer = document.getElementById("analytics-shot-markers");
+        const COURT = { left: 17, top: 21, right: 281, bottom: 252 };
+        let analyticsGames = [];
+
+        function makeShotMarker(shot) {
+            if (!Number.isInteger(shot.x) || !Number.isInteger(shot.y)) {
+                return null;
+            }
+            const svgNS = "http://www.w3.org/2000/svg";
+            const x = COURT.left + (shot.x / 1000) * (COURT.right - COURT.left);
+            const y = COURT.bottom - (shot.y / 1000) * (COURT.bottom - COURT.top);
+            const marker = document.createElementNS(svgNS, "g");
+            marker.setAttribute("transform", `translate(${x} ${y})`);
+            marker.classList.add("analytics-shot-marker", shot.result);
+            const title = document.createElementNS(svgNS, "title");
+            title.textContent =
+                `${shot.result === "made" ? "Made" : "Missed"} · (${shot.x}, ${shot.y}) · ${shot.play}`;
+            marker.appendChild(title);
+
+            if (shot.result === "missed") {
+                const cross = document.createElementNS(svgNS, "path");
+                cross.setAttribute("d", "M-4 -4 L4 4 M4 -4 L-4 4");
+                marker.appendChild(cross);
+            } else {
+                const dot = document.createElementNS(svgNS, "circle");
+                dot.setAttribute("r", "3.5");
+                marker.appendChild(dot);
+            }
+            return marker;
+        }
+
+        function selectedGames() {
+            const selectedId = gameSelect.value;
+            return selectedId === "all"
+                ? analyticsGames
+                : analyticsGames.filter(item => item.game.id === selectedId);
+        }
+
+        function renderShotAnalysis(games) {
+            const shots = games.flatMap(item => item.shots);
+            const made = shots.filter(shot => shot.result === "made").length;
+            const missed = shots.filter(shot => shot.result === "missed").length;
+            const attempts = made + missed;
+            document.getElementById("attempt-total").textContent = attempts;
+            document.getElementById("made-total").textContent = made;
+            document.getElementById("shot-percentage").textContent =
+                `${attempts ? Math.round((made / attempts) * 100) : 0}%`;
+            document.getElementById("made-count").textContent = made;
+            document.getElementById("missed-count").textContent = missed;
+            document.getElementById("made-bar").style.width =
+                `${attempts ? (made / attempts) * 100 : 0}%`;
+            document.getElementById("missed-bar").style.width =
+                `${attempts ? (missed / attempts) * 100 : 0}%`;
+
+            markerLayer.replaceChildren();
+            shots.forEach(shot => {
+                const marker = makeShotMarker(shot);
+                if (marker) markerLayer.appendChild(marker);
+            });
+        }
+
+        function renderStatAnalysis(games) {
+            const categoryFilter = categorySelect.value;
+            const totals = new Map();
+            const playRows = [];
+            let recordCount = 0;
+
+            games.forEach(({ playStats }) => {
+                playStats.forEach(record => {
+                    if (
+                        categoryFilter !== "all" &&
+                        record.category !== categoryFilter &&
+                        !record.category.toLowerCase().includes(categoryFilter.toLowerCase())
+                    ) {
+                        return;
+                    }
+                    const counters = record.counters || {};
+                    const nonzeroCounters = Object.entries(counters)
+                        .filter(([, value]) => Number(value) > 0);
+                    if (nonzeroCounters.length) recordCount += 1;
+                    const total = nonzeroCounters.reduce((sum, [counter, value]) => {
+                        const count = Number(value) || 0;
+                        totals.set(counter, (totals.get(counter) || 0) + count);
+                        return sum + count;
+                    }, 0);
+                    if (total) {
+                        playRows.push({
+                            category: record.category,
+                            play: record.play,
+                            records: nonzeroCounters.length,
+                            total
+                        });
+                    }
+                });
+            });
+
+            document.getElementById("stat-record-total").textContent = recordCount;
+            const statChart = document.getElementById("stat-chart");
+            statChart.replaceChildren();
+            const sortedTotals = [...totals.entries()]
+                .filter(([, value]) => value > 0)
+                .sort((a, b) => b[1] - a[1]);
+
+            if (!sortedTotals.length) {
+                statChart.textContent = "No tracked stats for this selection yet.";
+            } else {
+                const maxValue = sortedTotals[0][1];
+                sortedTotals.forEach(([counter, value]) => {
+                    const row = document.createElement("div");
+                    row.className = "stat-chart-row";
+                    const label = document.createElement("span");
+                    label.className = "stat-chart-label";
+                    label.textContent = counter;
+                    const track = document.createElement("div");
+                    track.className = "analytics-track";
+                    const bar = document.createElement("span");
+                    bar.className = "analytics-bar stat-total-bar";
+                    bar.style.width = `${(value / maxValue) * 100}%`;
+                    track.appendChild(bar);
+                    const total = document.createElement("strong");
+                    total.textContent = value;
+                    row.append(label, track, total);
+                    statChart.appendChild(row);
+                });
+            }
+
+            const rows = document.getElementById("play-stat-rows");
+            rows.replaceChildren();
+            playRows.sort((a, b) => b.total - a.total || a.play.localeCompare(b.play));
+            if (!playRows.length) {
+                const row = document.createElement("tr");
+                const cell = document.createElement("td");
+                cell.colSpan = 3;
+                cell.textContent = "No play stats for this selection yet.";
+                row.appendChild(cell);
+                rows.appendChild(row);
+            } else {
+                playRows.forEach(play => {
+                    const row = document.createElement("tr");
+                    const label = document.createElement("td");
+                    label.textContent = `${play.category} · ${play.play}`;
+                    const records = document.createElement("td");
+                    records.textContent = play.records;
+                    const total = document.createElement("td");
+                    total.textContent = play.total;
+                    row.append(label, records, total);
+                    rows.appendChild(row);
+                });
+            }
+        }
+
+        function renderAnalytics() {
+            const games = selectedGames();
+            renderShotAnalysis(games);
+            renderStatAnalysis(games);
+            statusMessage.textContent = games.length
+                ? `Showing analytics for ${games.length} ${games.length === 1 ? "game" : "games"}.`
+                : "No saved games match this selection.";
+            content.hidden = false;
+        }
+
+        async function initializeAnalytics() {
+            analyticsGames = await Promise.all((await loadAllGames()).map(async game => {
+                const [playStats, shots] = await Promise.all([
+                    loadGamePlayStats(game.id),
+                    loadGameShots(game.id)
+                ]);
+                return { game, playStats, shots };
+            }));
+
+            analyticsGames.sort((a, b) =>
+                (b.game.date || "").localeCompare(a.game.date || "")
+            );
+            analyticsGames.forEach(({ game }) => {
+                const option = document.createElement("option");
+                option.value = game.id;
+                option.textContent =
+                    `${game.opponent || "Unknown opponent"} · ${game.date || "No date"}`;
+                gameSelect.appendChild(option);
+            });
+            if (!analyticsGames.length) {
+                statusMessage.textContent =
+                    "No saved games yet. Start a game and record stats or shots to see analysis.";
+            }
+            renderAnalytics();
+        }
+
+        gameSelect.addEventListener("change", renderAnalytics);
+        categorySelect.addEventListener("change", renderAnalytics);
+        initializeAnalytics().catch(error => {
+            console.error("Could not load analytics:", error);
+            statusMessage.textContent = "Could not load analytics from this device.";
+        });
+    </script>
+</body>
+</html>
