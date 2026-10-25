@@ -41,7 +41,9 @@
                      role="application" aria-labelledby="court-title court-description">
                     <title id="court-title">Half-court shot chart</title>
                     <desc id="court-description">Tap the supplied half-court image to place a shot. The baseline is at the top, half court at the bottom, and the lower-left corner is coordinate zero, zero.</desc>
-                    <image href="/static/court-half.png" x="0" y="0" width="305" height="275"
+                    <rect class="court-backdrop" x="17" y="21" width="264" height="231"></rect>
+                    <image class="court-image" href="/static/court-half.png"
+                           x="0" y="0" width="305" height="275"
                            preserveAspectRatio="none"></image>
                     <g id="shot-markers" aria-hidden="true"></g>
                     <g id="pending-shot-marker" aria-hidden="true"></g>
