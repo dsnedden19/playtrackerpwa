@@ -1,8 +1,7 @@
-const CACHE_NAME = "playtracker-v28";
+const CACHE_NAME = "playtracker-v29";
 
-// Only routes that exist with no URL params. Dynamic pages
-// (/stat/<cat>/<play>, /plays/<cat>) get cached on first visit instead —
-// see the fetch handler below.
+// The install handler also precaches every generated category and play page
+// returned by /api/offline-urls.
 const urlsToCache = [
     "/",
     "/setup",

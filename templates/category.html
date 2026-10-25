@@ -1,31 +1,214 @@
 <link rel="stylesheet" href="/static/style.css">
 
-<div class="container">
-    <h2>Select Category</h2>
+<div class="container selector-container">
+    <header class="selector-header">
+        <div>
+            <h2>Game Tracker</h2>
+            <p id="active-game-label">Choose a category, type, play, then record stats.</p>
+        </div>
+        <nav class="selector-nav">
+            <a href="/summary" class="button">Summary</a>
+            <a href="/" class="button">Home</a>
+        </nav>
+    </header>
 
-    <div class="button-grid">
-        <a class="button cat-man" href="/plays/Man Offense">
-            Man Offense
-        </a>
-
-        <a class="button cat-zone" href="/plays/Zone Offense">
-            Zone Offense
-        </a>
-
-        <a class="button cat-blob" href="/plays/Blob">
-            Blob
-        </a>
-
-        <a class="button cat-slob" href="/plays/Slob">
-            Slob
-        </a>
-
-        <a class="button cat-defense" href="/plays/Defense">
-            Defense
-        </a>
-
-        <a href="/" class="button" style="background-color: gray;">
-            Home
-        </a>
-    </div>
+    <main class="selector-board">
+        <section class="selector-panel category-panel">
+            <h3>Category</h3>
+            <div id="category-options" class="selector-options"></div>
+        </section>
+        <section class="selector-panel type-panel">
+            <h3>Type</h3>
+            <div id="type-options" class="selector-options"></div>
+        </section>
+        <section class="selector-panel plays-panel">
+            <h3>Plays</h3>
+            <div id="play-options" class="play-options"></div>
+        </section>
+        <section class="selector-panel stats-panel">
+            <h3>Stats</h3>
+            <div id="stat-options" class="stat-options"></div>
+        </section>
+    </main>
 </div>
+
+<script src="/static/storage.js"></script>
+<script>
+    const selectorConfig = {{ selector_config | tojson }};
+    const offenseCounters = {{ offense_counters | tojson }};
+    const defenseCounters = {{ defense_counters | tojson }};
+    const gameId = localStorage.getItem("activeGameId");
+
+    let selectedCategory = "Offense";
+    let selectedType = "Man";
+    let selectedPlay = selectorConfig[selectedCategory][selectedType].plays[0];
+
+    const categoryOptions = document.getElementById("category-options");
+    const typeOptions = document.getElementById("type-options");
+    const playOptions = document.getElementById("play-options");
+    const statOptions = document.getElementById("stat-options");
+
+    function makeOption(label, isSelected, onSelect, className = "") {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = `selector-option ${className}${isSelected ? " selected" : ""}`;
+        button.textContent = label;
+        button.setAttribute("aria-pressed", String(isSelected));
+        button.addEventListener("click", onSelect);
+        return button;
+    }
+
+    function renderCategories() {
+        categoryOptions.replaceChildren();
+        Object.keys(selectorConfig).forEach(category => {
+            categoryOptions.appendChild(makeOption(
+                category,
+                category === selectedCategory,
+                () => {
+                    selectedCategory = category;
+                    selectedType = Object.keys(selectorConfig[category])[0];
+                    selectedPlay = selectorConfig[category][selectedType].plays[0];
+                    render();
+                },
+                category === "Offense" ? "offense-option" : "defense-option"
+            ));
+        });
+    }
+
+    function renderTypes() {
+        typeOptions.replaceChildren();
+        Object.keys(selectorConfig[selectedCategory]).forEach(type => {
+            typeOptions.appendChild(makeOption(
+                type,
+                type === selectedType,
+                () => {
+                    selectedType = type;
+                    selectedPlay = selectorConfig[selectedCategory][type].plays[0];
+                    render();
+                }
+            ));
+        });
+    }
+
+    function renderPlays() {
+        playOptions.replaceChildren();
+        const typeConfig = selectorConfig[selectedCategory][selectedType];
+        typeConfig.plays.forEach((play, index) => {
+            playOptions.appendChild(makeOption(
+                play,
+                play === selectedPlay,
+                () => {
+                    selectedPlay = play;
+                    render();
+                },
+                `play-color-${(index % 5) + 1}`
+            ));
+        });
+    }
+
+    let statsRenderVersion = 0;
+
+    async function renderStats(renderVersion) {
+        statOptions.replaceChildren();
+        const typeConfig = selectorConfig[selectedCategory][selectedType];
+        const categoryKey = typeConfig.category;
+        const play = selectedPlay;
+        const counters = selectedCategory === "Defense"
+            ? defenseCounters
+            : offenseCounters;
+        const record = gameId
+            ? await loadPlayStats(gameId, categoryKey, play)
+            : null;
+        if (renderVersion !== statsRenderVersion) {
+            return;
+        }
+
+        counters.forEach((counter, index) => {
+            const card = document.createElement("div");
+            card.className = `inline-stat stat-${(index % 5) + 1}`;
+
+            const minusButton = document.createElement("button");
+            minusButton.type = "button";
+            minusButton.className = "inline-stat-control";
+            minusButton.textContent = "−";
+            minusButton.setAttribute("aria-label", `Subtract 1 from ${counter}`);
+
+            const label = document.createElement("span");
+            label.className = "inline-stat-label";
+            label.textContent = counter;
+
+            const value = document.createElement("span");
+            value.className = "inline-stat-value";
+            value.textContent = record?.counters?.[counter] ?? 0;
+
+            const plusButton = document.createElement("button");
+            plusButton.type = "button";
+            plusButton.className = "inline-stat-control";
+            plusButton.textContent = "+";
+            plusButton.setAttribute("aria-label", `Add 1 to ${counter}`);
+
+            const updateCount = async delta => {
+                if (!gameId) {
+                    alert("Start or resume a game before changing stats.");
+                    return;
+                }
+
+                minusButton.disabled = true;
+                plusButton.disabled = true;
+                try {
+                    const updated = await adjustPlayStat(
+                        gameId,
+                        categoryKey,
+                        play,
+                        counter,
+                        delta
+                    );
+                    value.textContent = updated.counters[counter];
+                } catch (error) {
+                    console.error("Could not update stat:", error);
+                    alert("Could not update this stat. Please try again.");
+                } finally {
+                    minusButton.disabled = false;
+                    plusButton.disabled = false;
+                }
+            };
+
+            minusButton.addEventListener("click", () => updateCount(-1));
+            plusButton.addEventListener("click", () => updateCount(1));
+            card.append(minusButton, label, value, plusButton);
+            statOptions.appendChild(card);
+        });
+    }
+
+    function render() {
+        renderCategories();
+        renderTypes();
+        renderPlays();
+        const renderVersion = ++statsRenderVersion;
+        renderStats(renderVersion).catch(error => {
+            if (renderVersion !== statsRenderVersion) {
+                return;
+            }
+            console.error("Could not load stats:", error);
+            statOptions.textContent = "Could not load stats for this play.";
+        });
+    }
+
+    async function initialize() {
+        if (gameId) {
+            const game = await loadGame(gameId);
+            if (game) {
+                document.getElementById("active-game-label").textContent =
+                    `${game.opponent} | ${game.date} | ${game.homeaway}`;
+            }
+        }
+        render();
+    }
+
+    initialize().catch(error => {
+        console.error("Could not initialize tracker:", error);
+        document.getElementById("active-game-label").textContent =
+            "Could not load the active game.";
+        render();
+    });
+</script>

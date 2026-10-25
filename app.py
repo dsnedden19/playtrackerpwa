@@ -36,11 +36,42 @@ plays_by_category = {
         "Atlanta", "Irish", "Slice", "Vegas"
     ],
     "Defense": [
-        "Man", "3-2 Zone", "2-3 Zone", "Tri and 2",
-        "2-3 High Man", "2-3 High 3-2", "Shakers", "2-3 High 2-3",
-        "Twilight", "Marquette", "Transition"
+        "1", "2-high", "Shakers", "Tri and 2", "Transition",
+        "1-3-1", "3-2", "2-3", "2-high-3", "2-high-2",
+        "Marquette", "Twilight"
     ]
 }
+
+selector_config = {
+    "Offense": {
+        "Man": {"category": "Man Offense", "plays": plays_by_category["Man Offense"]},
+        "Zone": {"category": "Zone Offense", "plays": plays_by_category["Zone Offense"]},
+        "BLOB": {"category": "Blob", "plays": plays_by_category["Blob"]},
+        "SLOB": {"category": "Slob", "plays": plays_by_category["Slob"]},
+    },
+    "Defense": {
+        "Man": {
+            "category": "Defense",
+            "plays": ["1", "2-high", "Shakers", "Tri and 2", "Transition"],
+        },
+        "Zone": {
+            "category": "Defense",
+            "plays": ["1-3-1", "3-2", "2-3", "2-high-3", "2-high-2", "Marquette", "Twilight"],
+        },
+    },
+}
+
+offense_counters = [
+    "LUM", "LUA", "UnCon LUM", "UnCon LUA",
+    "MidM", "MidA", "3ptM", "3ptA", "FTM", "FTA",
+    "O Reb", "2nd Chance", "D Foul", "O Foul", "Turnover", "Ran"
+]
+
+defense_counters = [
+    "Off Reb", "2nd Chance Pts", "D Reb", "D Foul",
+    "FTM", "FTA", "O Foul", "Tip", "Turnover", "Close Out",
+    "Points", "Ran"
+]
 
 
 # -------------------------
@@ -48,20 +79,6 @@ plays_by_category = {
 # -------------------------
 @app.route("/stat/<cat>/<play>", methods=["GET", "POST"])
 def stat(cat, play):
-
-    offense_counters = [
-        "LUM","LUA","UnCon LUM","UnCon LUA",
-        "MidM","MidA","3ptM","3ptA","FTM","FTA",
-        "O Reb","2nd Chance",
-        "D Foul","O Foul","Turnover","Ran"
-    ]
-
-    defense_counters = [
-        "Off Reb","2nd Chance Pts","D Reb","D Foul",
-        "FTM","FTA","O Foul","Tip",
-        "Turnover","Close Out", "Points", "Ran"
-    ]
-
     counters = defense_counters if cat == "Defense" else offense_counters
 
     global stats
@@ -124,7 +141,12 @@ def setup():
             "homeaway": homeaway
         }
 
-        return render_template("category.html")
+        return render_template(
+            "category.html",
+            selector_config=selector_config,
+            offense_counters=offense_counters,
+            defense_counters=defense_counters,
+        )
 
     return render_template("setup.html")
 
@@ -134,7 +156,12 @@ def setup():
 # -------------------------
 @app.route("/category")
 def category():
-    return render_template("category.html")
+    return render_template(
+        "category.html",
+        selector_config=selector_config,
+        offense_counters=offense_counters,
+        defense_counters=defense_counters,
+    )
 
 
 # -------------------------

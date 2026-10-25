@@ -156,6 +156,160 @@ h1, h2, h3 {
     opacity: .65;
 }
 
+/* Four linked selectors on the live game screen. */
+.selector-container {
+    width: min(100%, 1500px);
+    max-width: none;
+}
+
+.selector-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    text-align: left;
+}
+
+.selector-header h2,
+.selector-header p {
+    margin: 0 0 8px;
+}
+
+.selector-nav {
+    display: flex;
+    gap: 8px;
+}
+
+.selector-nav .button {
+    width: auto;
+    min-width: 90px;
+}
+
+.selector-board {
+    display: grid;
+    grid-template-columns: minmax(100px, .85fr) minmax(115px, .95fr)
+        minmax(280px, 2.2fr) minmax(410px, 3.3fr);
+    gap: 10px;
+    align-items: start;
+    text-align: left;
+    margin-top: 16px;
+}
+
+.selector-panel {
+    min-width: 0;
+    padding: 10px;
+    border: 1px solid #333;
+    border-radius: 12px;
+    background: #1b1b1b;
+}
+
+.selector-panel h3 {
+    margin: 2px 0 10px;
+    font-size: 1rem;
+}
+
+.selector-options {
+    display: grid;
+    gap: 7px;
+}
+
+.selector-option {
+    min-width: 0;
+    min-height: 42px;
+    padding: 8px 6px;
+    border: 1px solid #414141;
+    border-radius: 9px;
+    background: #292929;
+    color: #f5f5f5;
+    font: inherit;
+    font-size: .92rem;
+    line-height: 1.15;
+    overflow-wrap: anywhere;
+    touch-action: manipulation;
+}
+
+.selector-option.selected {
+    outline: 2px solid #ff7a00;
+    border-color: #ff7a00;
+    font-weight: 700;
+}
+
+.offense-option.selected {
+    background: linear-gradient(135deg, #0066ff, #009dff);
+}
+
+.defense-option.selected {
+    background: linear-gradient(135deg, #8e24aa, #c158dc);
+}
+
+.play-options {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+}
+
+.play-options .selector-option {
+    min-height: 48px;
+}
+
+.play-color-1.selected { background: linear-gradient(135deg, #0066ff, #009dff); }
+.play-color-2.selected { background: linear-gradient(135deg, #1cbf5b, #39e67a); }
+.play-color-3.selected { background: linear-gradient(135deg, #e53935, #ff5c5c); }
+.play-color-4.selected { background: linear-gradient(135deg, #ff7a00, #ffae42); color: #111; }
+.play-color-5.selected { background: linear-gradient(135deg, #8e24aa, #c158dc); }
+
+.stat-options {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+}
+
+.inline-stat {
+    display: grid;
+    grid-template-columns: 30px minmax(0, 1fr) 28px 30px;
+    align-items: center;
+    min-width: 0;
+    min-height: 38px;
+    overflow: hidden;
+    border-radius: 8px;
+    color: #fff;
+}
+
+.inline-stat.stat-4 {
+    color: #111;
+}
+
+.inline-stat-control {
+    width: 30px;
+    height: 38px;
+    padding: 0;
+    border: 0;
+    background: rgba(0, 0, 0, .16);
+    color: inherit;
+    font-size: 1.25rem;
+    font-weight: 700;
+    touch-action: manipulation;
+}
+
+.inline-stat-control:disabled {
+    opacity: .6;
+}
+
+.inline-stat-label {
+    min-width: 0;
+    padding-left: 5px;
+    overflow: hidden;
+    font-size: .76rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.inline-stat-value {
+    text-align: center;
+    font-size: .82rem;
+    font-weight: 700;
+}
+
 /* BUTTON GRID */
 .button-grid {
     display: grid;
@@ -209,6 +363,14 @@ a {
         padding: 16px;
         width: 80%;
         max-width: 300px;
+    }
+
+    .selector-container {
+        overflow-x: auto;
+    }
+
+    .selector-board {
+        min-width: 960px;
     }
 }
 
