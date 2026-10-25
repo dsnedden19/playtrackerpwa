@@ -1,4 +1,4 @@
-const CACHE_NAME = "playtracker-v27";
+const CACHE_NAME = "playtracker-v28";
 
 // Only routes that exist with no URL params. Dynamic pages
 // (/stat/<cat>/<play>, /plays/<cat>) get cached on first visit instead —
@@ -12,8 +12,6 @@ const urlsToCache = [
     "/static/style.css",
     "/static/manifest.json",
     "/static/storage.js",
-    "/static/icon-192.png",
-    "/static/icon-512.png",
     "/sw.js"
 ];
 
@@ -22,28 +20,21 @@ self.addEventListener("install", event => {
     event.waitUntil(
         (async () => {
             const cache = await caches.open(CACHE_NAME);
-
-            // Every /stat/<cat>/<play> and /plays/<cat> page, generated
-            // server-side from plays_by_category, so nothing depends on
-            // having visited a play manually while online first.
-            let dynamicUrls = [];
-            try {
-                const res = await fetch("/api/offline-urls");
-                const data = await res.json();
-                dynamicUrls = data.urls || [];
-            } catch (err) {
-                console.error("Could not fetch offline URL list — dynamic pages will only cache as they're visited:", err);
+            const response = await fetch("/api/offline-urls", { cache: "no-store" });
+            if (!response.ok) {
+                throw new Error(`Offline URL list request failed: ${response.status}`);
             }
 
-            const allUrls = [...urlsToCache, ...dynamicUrls];
-
-            for (const url of allUrls) {
-                try {
-                    await cache.add(url);
-                } catch (err) {
-                    console.error("FAILED to precache:", url, err);
-                }
+            const data = await response.json();
+            if (!Array.isArray(data.urls) || !data.urls.every(
+                url => typeof url === "string" && url.startsWith("/")
+            )) {
+                throw new Error("Offline URL list is invalid.");
             }
+
+            // Install only after every built-in page and generated play page
+            // can be served offline; otherwise keep the previous worker active.
+            await cache.addAll([...new Set([...urlsToCache, ...data.urls])]);
         })()
     );
 });
