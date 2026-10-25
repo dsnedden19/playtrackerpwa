@@ -158,8 +158,10 @@ h1, h2, h3 {
 
 /* Four linked selectors on the live game screen. */
 .selector-container {
-    width: min(100%, 1500px);
+    box-sizing: border-box;
+    width: 100%;
     max-width: none;
+    padding: 10px;
 }
 
 .selector-header {
@@ -187,8 +189,8 @@ h1, h2, h3 {
 
 .selector-board {
     display: grid;
-    grid-template-columns: minmax(100px, .85fr) minmax(115px, .95fr)
-        minmax(280px, 2.2fr) minmax(410px, 3.3fr);
+    grid-template-columns: minmax(76px, .75fr) minmax(84px, .85fr)
+        minmax(160px, 1.8fr) minmax(300px, 3.2fr);
     gap: 10px;
     align-items: start;
     text-align: left;
@@ -266,7 +268,7 @@ h1, h2, h3 {
 
 .inline-stat {
     display: grid;
-    grid-template-columns: 30px minmax(0, 1fr) 28px 30px;
+    grid-template-columns: 32px minmax(0, 1fr) 30px 32px;
     align-items: center;
     min-width: 0;
     min-height: 38px;
@@ -280,7 +282,7 @@ h1, h2, h3 {
 }
 
 .inline-stat-control {
-    width: 30px;
+    width: 32px;
     height: 38px;
     padding: 0;
     border: 0;
@@ -365,12 +367,41 @@ a {
         max-width: 300px;
     }
 
+    .selector-board {
+        grid-template-columns: minmax(64px, .7fr) minmax(72px, .8fr)
+            minmax(140px, 1.7fr) minmax(280px, 3.2fr);
+        gap: 7px;
+    }
+
+    .selector-panel {
+        padding: 7px;
+    }
+
+    .inline-stat {
+        grid-template-columns: 28px minmax(0, 1fr) 26px 28px;
+    }
+
+    .inline-stat-control {
+        width: 28px;
+    }
+
+    .inline-stat-label {
+        padding-left: 3px;
+        font-size: .7rem;
+    }
+}
+
+@media (max-width: 700px) {
     .selector-container {
         overflow-x: auto;
     }
 
     .selector-board {
-        min-width: 960px;
+        min-width: 760px;
+    }
+
+    .play-options {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 }
 
