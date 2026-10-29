@@ -24,7 +24,7 @@ plays_by_category = {
     "Man Offense": [
         "2 High", "4 High", "4 High Box", "4 Low", "5 out", "Boston", "Box", "Celtic", "Chin",
         "Duke", "Hi Low", "Jersey", "Muchilla", "Nova", "NY",
-        "Oregon", "Power", "Rub", "Texas", "Through", "Transition"
+        "Oregon", "Overload" "Power", "Rub", "Texas", "Through", "Transition"
     ],
     "Zone Offense": [
         "14", "32", "5 out","Chin", "Hi Low", "Hope", "Michigan", "NY", "Power", "Sparkle", "Triangle"
