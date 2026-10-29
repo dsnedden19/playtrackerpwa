@@ -43,7 +43,7 @@
                     <svg id="shot-court" class="shot-court" viewBox="17 21 264 231"
                          role="application" aria-labelledby="court-title court-description">
                         <title id="court-title">Half-court shot chart</title>
-                        <desc id="court-description">Tap the supplied half-court image to place a shot. The baseline is at the top, half court at the bottom, and the lower-left corner is coordinate zero, zero.</desc>
+                        <desc id="court-description">Tap the supplied half-court image to place a shot. The baseline is at the top, half court at the bottom, and the lower-left corner is coordinate (0, 0).</desc>
                         <rect class="court-backdrop" x="17" y="21" width="264" height="231"></rect>
                         <image class="court-image" href="/static/court-half.png"
                                x="0" y="0" width="305" height="275"
@@ -69,6 +69,11 @@
     const offenseCounters = {{ offense_counters | tojson }};
     const defenseCounters = {{ defense_counters | tojson }};
     const gameId = localStorage.getItem("activeGameId");
+
+    const typeOrder = {
+        "Offense": ["Man", "Zone", "BLOB", "SLOB"],
+        "Defense": ["Man", "Zone"]
+    };
 
     let selectedCategory = "Offense";
     let selectedType = "Man";
@@ -251,7 +256,8 @@
                 category === selectedCategory,
                 () => {
                     selectedCategory = category;
-                    selectedType = Object.keys(selectorConfig[category])[0];
+                    const orderedTypes = typeOrder[category] ?? Object.keys(selectorConfig[category]);
+                    selectedType = orderedTypes[0];
                     selectedPlay = selectorConfig[category][selectedType].plays[0];
                     clearShotLocation();
                     render();
@@ -263,7 +269,11 @@
 
     function renderTypes() {
         typeOptions.replaceChildren();
-        Object.keys(selectorConfig[selectedCategory]).forEach(type => {
+        const orderedTypes = typeOrder[selectedCategory] ?? Object.keys(selectorConfig[selectedCategory]);
+        orderedTypes.forEach(type => {
+            if (!(type in selectorConfig[selectedCategory])) {
+                return;
+            }
             typeOptions.appendChild(makeOption(
                 type,
                 type === selectedType,
