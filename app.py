@@ -27,7 +27,7 @@ plays_by_category = {
         "Oregon", "Power", "Rub", "Texas", "Through", "Transition"
     ],
     "Zone Offense": [
-        "14", "32", "5 out","Chin", "Hi Low", "Hope", "Michigan", "NY", "Overload",  "Power", "Sparkle", "Triangle"
+        "14", "32", "5 out","Chin", "Hi Low", "Hope", "Horns", "Michigan", "NY", "Overload",  "Power", "Sparkle", "Triangle"
     ],
     "Blob": [
         "Box", "J", "K", "L", "O", "Strong", "Weak", "Weak Rev", "X"
